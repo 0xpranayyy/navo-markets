@@ -1,4 +1,5 @@
 import type { ActivityItem, Category, Market, Order, OrderBook, Outcome, Position } from '../types';
+import { CATEGORY_GAMMA_TAGS } from '../constants/categories';
 
 const GAMMA = import.meta.env.VITE_POLYMARKET_GAMMA_API ?? 'https://gamma-api.polymarket.com';
 const CLOB = import.meta.env.VITE_POLYMARKET_CLOB_API ?? 'https://clob.polymarket.com';
@@ -10,29 +11,43 @@ const MARKET_COLORS = ['#0A84FF', '#30D158', '#FF9F0A', '#BF5AF2', '#FF453A', '#
 const CATEGORY_MAP: Record<string, Category> = {
   politics: 'Politics',
   election: 'Politics',
+  elections: 'Politics',
   government: 'Politics',
+  'international-affairs': 'Politics',
+  'foreign-affairs': 'Politics',
+  'house-races': 'Politics',
+  'federal-government': 'Politics',
   sports: 'Sports',
   nfl: 'Sports',
   nba: 'Sports',
   mlb: 'Sports',
+  nhl: 'Sports',
   soccer: 'Sports',
+  ufc: 'Sports',
+  f1: 'Sports',
+  'world-cup': 'Sports',
   crypto: 'Crypto',
   bitcoin: 'Crypto',
   ethereum: 'Crypto',
   defi: 'Crypto',
+  blockchain: 'Crypto',
+  openai: 'Crypto',
   finance: 'Economy',
   business: 'Economy',
   economy: 'Economy',
   fed: 'Economy',
   stocks: 'Economy',
+  macro: 'Economy',
   pop: 'Pop Culture',
   culture: 'Pop Culture',
   entertainment: 'Pop Culture',
   music: 'Pop Culture',
   movies: 'Pop Culture',
+  celebrity: 'Pop Culture',
   tech: 'Pop Culture',
-  science: 'Economy',
   ai: 'Pop Culture',
+  science: 'Economy',
+  awards: 'Pop Culture',
 };
 
 export const TIMEFRAME_PARAMS: Record<string, { interval: string; fidelity: number }> = {
@@ -131,22 +146,25 @@ function initialsFromQuestion(question: string): string {
 }
 
 function inferCategory(raw: GammaMarket): Category {
-  const tags = raw.events?.[0]?.tags?.flatMap((t) => [
+  const tags = raw.events?.flatMap((e) => e.tags ?? []).flatMap((t) => [
     t.label?.toLowerCase() ?? '',
     t.slug?.toLowerCase() ?? '',
   ]) ?? [];
+
   for (const tag of tags) {
     if (!tag) continue;
+    if (CATEGORY_MAP[tag]) return CATEGORY_MAP[tag];
     for (const [key, category] of Object.entries(CATEGORY_MAP)) {
       if (tag.includes(key)) return category;
     }
   }
+
   const q = raw.question.toLowerCase();
-  if (/bitcoin|btc|eth|crypto|token|solana|defi|blockchain|nft/.test(q)) return 'Crypto';
-  if (/nfl|nba|mlb|nhl|super bowl|championship|cup|match|win|ufc|f1|formula/.test(q)) return 'Sports';
-  if (/fed|gdp|recession|inflation|rate|economy|ipo|stock|tariff|unemployment/.test(q)) return 'Economy';
-  if (/oscar|album|movie|taylor|celebrity|grammy|gta|spotify|tiktok|youtube/.test(q)) return 'Pop Culture';
-  if (/president|senate|election|trump|congress|vote|party|prime minister|governor/.test(q)) return 'Politics';
+  if (/\b(bitcoin|btc|eth|ethereum|crypto|token|solana|defi|blockchain|nft|dogecoin|xrp)\b/.test(q)) return 'Crypto';
+  if (/\b(nfl|nba|mlb|nhl|super bowl|championship|world cup|match|ufc|f1|formula|tennis|golf|premier league)\b/.test(q)) return 'Sports';
+  if (/\b(fed|fomc|gdp|recession|inflation|interest rate|economy|ipo|stock|tariff|unemployment|cpi|jobs report)\b/.test(q)) return 'Economy';
+  if (/\b(oscar|album|movie|taylor|celebrity|grammy|gta|spotify|tiktok|youtube|netflix|award)\b/.test(q)) return 'Pop Culture';
+  if (/\b(president|senate|election|trump|biden|congress|vote|party|prime minister|governor|democrat|republican)\b/.test(q)) return 'Politics';
   return 'Economy';
 }
 
@@ -291,9 +309,11 @@ export function mapGammaMarket(raw: GammaMarket): Market | null {
 }
 
 const GAMMA_PAGE_SIZE = 50;
-const GAMMA_CATALOG_LIMIT = 200;
+const GAMMA_CATALOG_LIMIT = 320;
+const GAMMA_EVENT_TARGET = 120;
+const TAG_SUPPLEMENT_PER_TAG = 30;
 
-async function fetchGammaEventsPage(offset: number, limit: number): Promise<GammaEvent[]> {
+async function fetchGammaEventsPage(offset: number, limit: number, tagSlug?: string): Promise<GammaEvent[]> {
   const params = new URLSearchParams({
     active: 'true',
     closed: 'false',
@@ -303,6 +323,7 @@ async function fetchGammaEventsPage(offset: number, limit: number): Promise<Gamm
     order: 'volume24hr',
     ascending: 'false',
   });
+  if (tagSlug) params.set('tag_slug', tagSlug);
   const res = await fetch(`${GAMMA}/events?${params}`);
   if (!res.ok) throw new Error(`Gamma API error: ${res.status}`);
   return (await res.json()) as GammaEvent[];
@@ -345,16 +366,57 @@ function collectMarketsFromEvents(events: GammaEvent[], limit: number): Market[]
   return markets;
 }
 
+function mergeMarketsIntoCatalog(catalog: Market[], incoming: Market[], limit: number): Market[] {
+  const seen = new Set(catalog.map((m) => m.id));
+  for (const m of incoming) {
+    if (seen.has(m.id)) continue;
+    catalog.push(m);
+    seen.add(m.id);
+    if (catalog.length >= limit) break;
+  }
+  return catalog;
+}
+
+async function fetchCategoryTagSupplements(limit: number): Promise<GammaEvent[]> {
+  const tagSlugs = [...new Set(Object.values(CATEGORY_GAMMA_TAGS).flat())];
+  const batches = await Promise.all(
+    tagSlugs.map((tag) =>
+      fetchGammaEventsPage(0, TAG_SUPPLEMENT_PER_TAG, tag).catch(() => [] as GammaEvent[]),
+    ),
+  );
+  const events: GammaEvent[] = [];
+  const seen = new Set<string>();
+  for (const batch of batches) {
+    for (const event of batch) {
+      if (seen.has(event.id)) continue;
+      seen.add(event.id);
+      events.push(event);
+      if (events.length >= limit) return events;
+    }
+  }
+  return events;
+}
+
 export async function fetchGammaMarkets(limit = GAMMA_CATALOG_LIMIT): Promise<Market[]> {
   const events: GammaEvent[] = [];
   let offset = 0;
 
-  while (events.length < 80) {
+  while (events.length < GAMMA_EVENT_TARGET) {
     const batch = await fetchGammaEventsPage(offset, GAMMA_PAGE_SIZE);
     if (!batch.length) break;
     events.push(...batch);
     offset += batch.length;
     if (batch.length < GAMMA_PAGE_SIZE) break;
+  }
+
+  // Backfill category tabs that volume-sorted feed under-represents.
+  const tagEvents = await fetchCategoryTagSupplements(80);
+  const seenEventIds = new Set(events.map((e) => e.id));
+  for (const event of tagEvents) {
+    if (!seenEventIds.has(event.id)) {
+      events.push(event);
+      seenEventIds.add(event.id);
+    }
   }
 
   let markets = collectMarketsFromEvents(events, limit);
@@ -370,16 +432,10 @@ export async function fetchGammaMarkets(limit = GAMMA_CATALOG_LIMIT): Promise<Ma
       offset += batch.length;
     }
 
-    const seen = new Set(markets.map((m) => m.id));
-    for (const raw of pages) {
-      if (seen.has(raw.id)) continue;
-      const mapped = mapGammaMarket(raw);
-      if (mapped) {
-        seen.add(raw.id);
-        markets.push(mapped);
-        if (markets.length >= limit) break;
-      }
-    }
+    const supplemental = pages
+      .map(mapGammaMarket)
+      .filter((m): m is Market => m !== null);
+    markets = mergeMarketsIntoCatalog(markets, supplemental, limit);
   }
 
   return markets;
@@ -476,7 +532,10 @@ export async function searchMarkets(query: string): Promise<Market[]> {
     if (event.closed || event.archived) continue;
     for (const raw of event.markets ?? []) {
       if (raw.closed || raw.archived || seen.has(raw.id)) continue;
-      const mapped = mapGammaMarket(raw);
+      const withTags = raw.events?.length
+        ? raw
+        : { ...raw, events: [{ tags: event.tags }] };
+      const mapped = mapGammaMarket(withTags);
       if (mapped) {
         seen.add(raw.id);
         markets.push(mapped);

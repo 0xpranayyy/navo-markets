@@ -2,6 +2,17 @@ import { useApp } from '../store/AppContext';
 import { useTheme, formatVolume } from '../theme';
 import { iosLayout, iosType } from '../theme/typography';
 import type { Market } from '../types';
+import { marketEndMs } from '../utils/marketFeed';
+
+function endingSoonLabel(m: Market): string | null {
+  const endMs = marketEndMs(m);
+  if (endMs == null) return null;
+  const days = Math.ceil((endMs - Date.now()) / 86_400_000);
+  if (days < 0 || days > 7) return null;
+  if (days === 0) return 'Ends today';
+  if (days === 1) return 'Ends tomorrow';
+  return `Ends in ${days}d`;
+}
 
 export default function MarketCard({ market: m }: { market: Market }) {
   const { state, dispatch, openTicket } = useApp();
@@ -10,6 +21,7 @@ export default function MarketCard({ market: m }: { market: Market }) {
   const watched = state.watchlist.includes(m.id);
   const changeColor = !isBinary ? C.sub : m.change > 0 ? C.green : m.change < 0 ? C.red : C.sub;
   const changeLabel = isBinary ? (m.change > 0 ? '+' : '') + m.change.toFixed(1) + '%' : '';
+  const endingSoon = endingSoonLabel(m);
 
   const buy = (e: React.MouseEvent, kind: 'yes' | 'no') => {
     e.stopPropagation();
@@ -49,7 +61,8 @@ export default function MarketCard({ market: m }: { market: Market }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ ...iosType.headline, color: C.text }}>{m.question}</div>
           <div style={{ ...iosType.footnote, color: C.faint, marginTop: 3 }}>
-            {m.category} · {formatVolume(m.volume24h ?? m.volume)} Vol
+            {m.category} · {formatVolume(m.volume24h ?? m.volume)} vol
+            {endingSoon ? ` · ${endingSoon}` : ''}
           </div>
         </div>
         <div className="pressable pressable-sm ios-hit-44" onClick={toggleWatch}

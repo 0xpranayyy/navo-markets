@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../store/AppContext';
 import { useTheme } from '../theme';
 import { CATEGORIES } from '../constants/categories';
@@ -11,7 +11,7 @@ import { marketPriceSocket } from '../api/ws-prices';
 import { LargeTitle, SearchField } from '../components/ios/controls';
 import { iosLayout } from '../theme/typography';
 import { hapticLight } from '../utils/haptics';
-import { buildMarketFeed } from '../utils/marketFeed';
+import { buildMarketFeed, categoryFeedCounts } from '../utils/marketFeed';
 
 export default function MarketsScreen() {
   const { state, dispatch, refreshMarkets } = useApp();
@@ -23,6 +23,10 @@ export default function MarketsScreen() {
   useEffect(() => marketPriceSocket.onStatus(setLive), []);
 
   const feed = buildMarketFeed(state.markets, state.activeCategory);
+  const counts = useMemo(() => categoryFeedCounts(state.markets), [state.markets]);
+  const emptyHint = state.activeCategory === 'Trending'
+    ? 'Pull to refresh — markets update throughout the day.'
+    : `No active ${state.activeCategory.toLowerCase()} markets right now. Try Trending or Search.`;
 
   return (
     <div className="anim-fadeslide" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
@@ -68,6 +72,7 @@ export default function MarketsScreen() {
         }}>
           {CATEGORIES.map((c) => {
             const activeCat = c === state.activeCategory;
+            const count = counts[c] ?? 0;
             return (
               <div
                 key={c}
@@ -81,10 +86,18 @@ export default function MarketsScreen() {
                   whiteSpace: 'nowrap', flexShrink: 0,
                   letterSpacing: -0.24,
                   minHeight: 32,
-                  display: 'flex', alignItems: 'center',
+                  display: 'flex', alignItems: 'center', gap: 6,
                 }}
               >
                 {c}
+                {count > 0 && (
+                  <span style={{
+                    fontSize: 12, fontWeight: 600, opacity: activeCat ? 0.85 : 0.55,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {count}
+                  </span>
+                )}
               </div>
             );
           })}
@@ -114,7 +127,10 @@ export default function MarketsScreen() {
           </>
         )}
         {!feed.length && !state.loadingMarkets && !state.marketsError && (
-          <div style={{ textAlign: 'center', color: C.faint, padding: 48, fontSize: 15 }}>No markets found</div>
+          <div style={{ textAlign: 'center', color: C.faint, padding: '48px 24px', fontSize: 15, lineHeight: 1.5 }}>
+            <div style={{ fontWeight: 600, color: C.sub, marginBottom: 8 }}>No markets here</div>
+            {emptyHint}
+          </div>
         )}
         {feed.map((m) => <MarketCard key={m.id} market={m} />)}
       </div>
