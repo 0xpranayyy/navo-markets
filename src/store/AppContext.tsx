@@ -37,6 +37,7 @@ interface AppState {
   openOrders: OpenOrder[];
   loadingOpenOrders: boolean;
   cashOutOpen: boolean;
+  depositOpen: boolean;
 }
 
 const WATCHLIST_KEY = 'navo-watchlist';
@@ -81,6 +82,7 @@ const initial: AppState = {
   openOrders: [],
   loadingOpenOrders: false,
   cashOutOpen: false,
+  depositOpen: false,
 };
 
 type Action =
@@ -114,7 +116,9 @@ type Action =
   | { type: 'SET_OPEN_ORDERS'; openOrders: OpenOrder[]; loading?: boolean }
   | { type: 'REMOVE_OPEN_ORDER'; id: string }
   | { type: 'OPEN_CASH_OUT' }
-  | { type: 'CLOSE_CASH_OUT' };
+  | { type: 'CLOSE_CASH_OUT' }
+  | { type: 'OPEN_DEPOSIT' }
+  | { type: 'CLOSE_DEPOSIT' };
 
 function reducer(s: AppState, a: Action): AppState {
   switch (a.type) {
@@ -241,6 +245,10 @@ function reducer(s: AppState, a: Action): AppState {
       return { ...s, cashOutOpen: true };
     case 'CLOSE_CASH_OUT':
       return { ...s, cashOutOpen: false };
+    case 'OPEN_DEPOSIT':
+      return { ...s, depositOpen: true };
+    case 'CLOSE_DEPOSIT':
+      return { ...s, depositOpen: false };
     default: return s;
   }
 }
@@ -469,7 +477,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!profile) {
         toast({
           title: 'Wallet not ready',
-          msg: 'Your embedded wallet is still loading. Wait a few seconds and try again.',
+          msg: 'Your wallet is still loading. Wait a few seconds and try again.',
           variant: 'error',
         });
         return;

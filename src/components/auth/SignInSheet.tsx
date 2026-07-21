@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useLoginWithEmail, useLoginWithOAuth, usePrivy, useWallets } from '@privy-io/react-auth';
+import { useConnectWallet, useLoginWithEmail, useLoginWithOAuth, useLoginWithSiwe, usePrivy, useWallets } from '@privy-io/react-auth';
+import { polygon } from 'viem/chains';
 import { useTheme } from '../../theme';
 import { NavoMark, NavoProductLockup } from '../brand/NavoMark';
 import { hapticLight } from '../../utils/haptics';
 import { isIos, isStandalonePwa } from '../../utils/pwa';
+import { PRIVY_WALLET_LIST, resolveLoginAddress } from '../../auth/wallet';
 import type { UserProfile } from '../../types';
 
 type Step = 'choose' | 'email' | 'otp';
@@ -50,7 +52,31 @@ function Spinner({ color }: { color: string }) {
 
 export default function SignInSheet({ open, onClose, onSuccess, buildProfile }: SignInSheetProps) {
   const { colors: C, sheet, resolved } = useTheme();
-  const { ready, authenticated, login: privyLogin } = usePrivy();
+  const { ready, authenticated, login: privyLogin, user } = usePrivy();
+  const { generateSiweMessage, loginWithSiwe } = useLoginWithSiwe({
+    onError: () => setBusy(null),
+  });
+  const { connectWallet: openWalletPicker } = useConnectWallet({
+    onSuccess: async ({ wallet }) => {
+      if (wallet.type !== 'ethereum') {
+        setError('Only EVM wallets are supported.');
+        setBusy(null);
+        return;
+      }
+      try {
+        const message = await generateSiweMessage({
+          address: wallet.address,
+          chainId: `eip155:${polygon.id}`,
+        });
+        const signature = await wallet.sign(message);
+        await loginWithSiwe({ signature, message });
+      } catch {
+        setError('Wallet sign-in was cancelled or failed.');
+        setBusy(null);
+      }
+    },
+    onError: () => setBusy(null),
+  });
   const { wallets, ready: walletsReady } = useWallets();
   const { initOAuth, loading: oauthLoading } = useLoginWithOAuth();
   const { sendCode, loginWithCode, state: emailState } = useLoginWithEmail();
@@ -58,7 +84,7 @@ export default function SignInSheet({ open, onClose, onSuccess, buildProfile }: 
   const [step, setStep] = useState<Step>('choose');
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [busy, setBusy] = useState<'apple' | 'google' | 'email' | 'privy' | null>(null);
+  const [busy, setBusy] = useState<'apple' | 'google' | 'email' | 'wallet' | 'privy' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const completing = useRef(false);
 
@@ -76,24 +102,26 @@ export default function SignInSheet({ open, onClose, onSuccess, buildProfile }: 
   }, [open, reset]);
 
   const tryComplete = useCallback(async () => {
-    if (completing.current || !authenticated || !walletsReady) return;
-    const wallet = wallets.find((w) => w.walletClientType === 'privy') ?? wallets[0];
-    if (!wallet?.address) return;
+    // Do NOT gate on walletsReady: Privy v3 can report a populated wallet
+    // list while `ready` stays false.
+    if (completing.current || !authenticated) return;
+    const address = resolveLoginAddress(wallets, user);
+    if (!address) return;
 
     completing.current = true;
     setBusy(null);
-    const profile = buildProfile(wallet.address);
+    const profile = buildProfile(address);
     if (profile) {
       hapticLight();
       onSuccess();
     } else {
       completing.current = false;
     }
-  }, [authenticated, buildProfile, onClose, onSuccess, wallets, walletsReady]);
+  }, [authenticated, buildProfile, onSuccess, user, wallets]);
 
   useEffect(() => {
     if (open && authenticated) void tryComplete();
-  }, [open, authenticated, wallets, walletsReady, tryComplete]);
+  }, [open, authenticated, user, wallets, tryComplete]);
 
   if (!open) return null;
 
@@ -142,6 +170,18 @@ export default function SignInSheet({ open, onClose, onSuccess, buildProfile }: 
       setError('Invalid code. Try again or request a new one.');
       setBusy(null);
     }
+  };
+
+  const connectWallet = () => {
+    if (!ready || loading) return;
+    hapticLight();
+    setError(null);
+    setBusy('wallet');
+    // Opens the wallet picker directly (MetaMask, WC, etc.) — not the social/email login modal.
+    openWalletPicker({
+      walletChainType: 'ethereum-only',
+      walletList: PRIVY_WALLET_LIST,
+    });
   };
 
   const openPrivyModal = async () => {
@@ -242,6 +282,30 @@ export default function SignInSheet({ open, onClose, onSuccess, buildProfile }: 
             >
               {busy === 'google' ? <Spinner color={C.blue} /> : <GoogleIcon />}
               Continue with Google
+            </button>
+
+            <button
+              type="button"
+              className="pressable auth-btn"
+              disabled={loading}
+              onClick={() => connectWallet()}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                width: '100%', border: `0.5px solid ${C.hair}`, borderRadius: 9999, padding: '16px 20px',
+                background: C.groupedSurface ?? C.inputBg,
+                color: C.text,
+                fontSize: 17, fontWeight: 600, cursor: loading ? 'wait' : 'pointer',
+                opacity: loading && busy !== 'wallet' ? 0.6 : 1,
+              }}
+            >
+              {busy === 'wallet' ? <Spinner color={C.blue} /> : (
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+                  <rect x="3" y="7" width="18" height="13" rx="2.5" stroke={C.sub} strokeWidth="1.8" fill="none" />
+                  <path d="M7 7V5.5a2 2 0 012-2h6a2 2 0 012 2V7" stroke={C.sub} strokeWidth="1.8" fill="none" />
+                  <circle cx="17" cy="13.5" r="1" fill={C.sub} />
+                </svg>
+              )}
+              Continue with Wallet
             </button>
 
             <button

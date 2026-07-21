@@ -8,7 +8,7 @@ import { resetTradingClients, loadTradingSession, deriveSafeAddress, clearTradin
 import SignInSheet from '../components/auth/SignInSheet';
 import { NavoMark } from '../components/brand/NavoMark';
 import { useTheme } from '../theme';
-import { isIos, isStandalonePwa } from '../utils/pwa';
+import { pickTradingWallet, PRIVY_WALLET_LIST, linkedWalletAddress } from './wallet';
 
 interface AuthContextValue {
   user: UserProfile | null;
@@ -55,8 +55,9 @@ function sleep(ms: number) {
 }
 
 function PrivyAuthBridge({ children }: { children: React.ReactNode }) {
-  const { ready, authenticated, logout: privyLogout, user } = usePrivy();
+  const { ready, authenticated, logout: privyLogout, user, createWallet } = usePrivy();
   const { wallets, ready: walletsReady } = useWallets();
+  const creatingWalletRef = useRef(false);
   const { fundWallet: privyFundWallet } = useFundWallet();
   const walletClientRef = useRef<WalletClient | null>(null);
   const walletsRef = useRef(wallets);
@@ -67,15 +68,32 @@ function PrivyAuthBridge({ children }: { children: React.ReactNode }) {
   walletsRef.current = wallets;
   userRef.current = user;
 
-  const embeddedWallet = useMemo(
-    () => wallets.find((w) => w.walletClientType === 'privy') ?? wallets[0],
-    [wallets],
+  const tradingWallet = useMemo(
+    () => pickTradingWallet(wallets, user),
+    [wallets, user],
   );
 
+  // Privy's createOnLogin can silently fail for email/social users; create embedded
+  // wallet explicitly. Skip for external-wallet logins — they trade with their EOA.
+  useEffect(() => {
+    if (!ready || !authenticated || creatingWalletRef.current) return;
+    if (wallets.some((w) => w.walletClientType === 'privy')) return;
+    if (linkedWalletAddress(user)) return;
+
+    const t = window.setTimeout(() => {
+      creatingWalletRef.current = true;
+      createWallet()
+        .catch(() => {
+          creatingWalletRef.current = false;
+        });
+    }, 2000);
+    return () => window.clearTimeout(t);
+  }, [ready, authenticated, wallets, user, createWallet]);
+
   const profile = useMemo<UserProfile | null>(() => {
-    if (!authenticated || !embeddedWallet?.address) return null;
-    return buildProfile(user, embeddedWallet.address);
-  }, [authenticated, embeddedWallet?.address, user]);
+    if (!authenticated || !tradingWallet?.address) return null;
+    return buildProfile(user, tradingWallet.address);
+  }, [authenticated, tradingWallet?.address, user]);
 
   const buildProfileForAddress = useCallback((address: string) => {
     if (!userRef.current && !address) return null;
@@ -83,7 +101,7 @@ function PrivyAuthBridge({ children }: { children: React.ReactNode }) {
   }, []);
 
   const getWalletClientInner = useCallback(async (): Promise<WalletClient | null> => {
-    const wallet = walletsRef.current.find((w) => w.walletClientType === 'privy') ?? walletsRef.current[0];
+    const wallet = pickTradingWallet(walletsRef.current, userRef.current);
     if (!wallet?.address) return null;
     try {
       await wallet.switchChain(polygon.id);
@@ -102,7 +120,7 @@ function PrivyAuthBridge({ children }: { children: React.ReactNode }) {
   const waitForWalletProfile = useCallback(async (maxMs = 15000): Promise<UserProfile | null> => {
     const deadline = Date.now() + maxMs;
     while (Date.now() < deadline) {
-      const wallet = walletsRef.current.find((w) => w.walletClientType === 'privy') ?? walletsRef.current[0];
+      const wallet = pickTradingWallet(walletsRef.current, userRef.current);
       if (wallet?.address) {
         await getWalletClientInner();
         return buildProfile(userRef.current, wallet.address);
@@ -145,16 +163,23 @@ function PrivyAuthBridge({ children }: { children: React.ReactNode }) {
   }, [waitForWalletProfile]);
 
   const logout = useCallback(async () => {
-    if (embeddedWallet?.address) clearTradingSession(embeddedWallet.address);
+    if (tradingWallet?.address) clearTradingSession(tradingWallet.address);
     walletClientRef.current = null;
     resetTradingClients();
     await privyLogout();
-  }, [embeddedWallet?.address, privyLogout]);
+  }, [tradingWallet?.address, privyLogout]);
 
   const fundWallet = useCallback(async () => {
-    if (!embeddedWallet?.address) return;
-    await privyFundWallet({ address: embeddedWallet.address, options: { chain: polygon } });
-  }, [embeddedWallet?.address, privyFundWallet]);
+    const address = tradingWallet?.address;
+    if (!address) {
+      throw new Error('Wallet not ready. Sign out, sign back in, then try again.');
+    }
+    const isEmbedded = tradingWallet?.walletClientType === 'privy';
+    if (!isEmbedded) {
+      throw new Error('Card buy only works with email/social login. Use the Polymarket bridge address to deposit USDC.');
+    }
+    await privyFundWallet({ address, options: { chain: polygon } });
+  }, [tradingWallet?.address, tradingWallet?.walletClientType, privyFundWallet]);
 
   useEffect(() => {
     const bridge: AuthBridge = {
@@ -164,16 +189,18 @@ function PrivyAuthBridge({ children }: { children: React.ReactNode }) {
       waitForWallet: waitForWalletProfile,
       getWalletClient,
       isAuthenticated: () => authenticated,
-      isReady: () => ready && walletsReady,
+      isReady: () => ready && (walletsReady || wallets.length > 0),
     };
     setAuthBridge(bridge);
     return () => setAuthBridge(null);
-  }, [authenticated, getWalletClient, login, logout, profile, ready, waitForWalletProfile, walletsReady]);
+  }, [authenticated, getWalletClient, login, logout, profile, ready, waitForWalletProfile, walletsReady, wallets]);
 
   const value: AuthContextValue = {
     user: profile,
     authenticated,
-    ready: ready && walletsReady,
+    // walletsReady can stay false in Privy v3 even with wallets populated;
+    // treat a non-empty wallet list as ready.
+    ready: ready && (walletsReady || wallets.length > 0),
     login,
     logout,
     fundWallet,
@@ -213,10 +240,6 @@ function MissingConfig() {
 function ThemeAwarePrivy({ children }: { children: React.ReactNode }) {
   const { resolved } = useTheme();
   const privyTheme = resolved === 'light' ? 'light' as const : '#000000' as const;
-  const loginPrimary = isIos() || isStandalonePwa()
-    ? (['apple', 'google', 'email'] as const)
-    : (['google', 'apple', 'email'] as const);
-
   const privyLogo = useMemo(
     () => <NavoMark size={56} base={resolved === 'dark' ? '#FFFFFF' : '#0B0C0E'} accent="#0A84FF" />,
     [resolved],
@@ -226,22 +249,22 @@ function ThemeAwarePrivy({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={privyAppId!}
       config={{
-        loginMethods: ['email', 'google', 'apple', 'wallet'],
-        loginMethodsAndOrder: {
-          primary: [...loginPrimary],
-        },
+        // Do NOT set loginMethodsAndOrder here — it overrides loginMethods and
+        // silently drops wallet login from every Privy modal.
+        loginMethods: ['wallet', 'email', 'google', 'apple'],
         appearance: {
           theme: privyTheme,
           accentColor: '#0A84FF',
           logo: privyLogo,
           landingHeader: 'Welcome to Navo',
           loginMessage: 'Trade prediction markets in seconds',
-          showWalletLoginFirst: false,
+          showWalletLoginFirst: true,
           walletChainType: 'ethereum-only',
+          walletList: PRIVY_WALLET_LIST,
         },
         embeddedWallets: {
           ethereum: {
-            createOnLogin: 'all-users',
+            createOnLogin: 'users-without-wallets',
           },
           showWalletUIs: false,
         },

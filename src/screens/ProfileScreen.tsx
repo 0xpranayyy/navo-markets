@@ -11,7 +11,7 @@ import { iosLayout, iosType } from '../theme/typography';
 
 export default function ProfileScreen() {
   const { state, dispatch, refreshPortfolio, setupTrading, transferToSafe, withdrawToEoa } = useApp();
-  const { user, authenticated, ready, login, logout, fundWallet } = useAuth();
+  const { user, authenticated, ready, login, logout } = useAuth();
   const { colors: C } = useTheme();
   const [builderReady, setBuilderReady] = useState<boolean | null>(null);
 
@@ -159,7 +159,7 @@ export default function ProfileScreen() {
             <SectionHeader>Wallet</SectionHeader>
             <GroupedList style={{ marginBottom: 22 }}>
               <ListRow title="Portfolio" subtitle="Positions, history, watchlist" onClick={() => dispatch({ type: 'SET_TAB', tab: 'portfolio' })} />
-              <ListRow title="Deposit funds" subtitle="Add USDC via Privy" onClick={() => void fundWallet()} />
+              <ListRow title="Deposit funds" subtitle="USDC via Polymarket bridge or card" onClick={() => dispatch({ type: 'OPEN_DEPOSIT' })} />
               {tradingReady && (
                 <ListRow title="Move to trading wallet" subtitle="Wrap USDC → pUSD" onClick={() => void transferToSafe()} />
               )}

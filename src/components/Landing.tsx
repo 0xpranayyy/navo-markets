@@ -118,7 +118,7 @@ export default function Landing() {
         <div className="navo-trust-row">
           <span><span className="navo-trust-dot" aria-hidden /> Polygon</span>
           <span><span className="navo-trust-dot" aria-hidden /> Privy Auth</span>
-          <span><span className="navo-trust-dot" aria-hidden /> Gnosis Safe</span>
+          <span><span className="navo-trust-dot" aria-hidden /> Trading wallet</span>
         </div>
       </div>
     </div>

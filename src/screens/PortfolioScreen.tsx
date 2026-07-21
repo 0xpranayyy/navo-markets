@@ -21,7 +21,7 @@ function findMarketId(markets: ReturnType<typeof useApp>['state']['markets'], ma
 
 export default function PortfolioScreen() {
   const { state, dispatch, refreshPortfolio, openSellTicket, setupTrading, transferToSafe, cancelOpenOrder, cancelAllOpenOrders } = useApp();
-  const { user, authenticated, login, logout, fundWallet } = useAuth();
+  const { user, authenticated, login, logout } = useAuth();
   const { colors: C, card } = useTheme();
   const { pull, refreshing, handlers } = usePullToRefresh(refreshPortfolio, authenticated);
   const [eoaBalance, setEoaBalance] = useState(0);
@@ -71,10 +71,7 @@ export default function PortfolioScreen() {
       await handleLogin();
       return;
     }
-    await fundWallet();
-    if (tradingReady) await transferToSafe();
-    await refreshPortfolio();
-    api.getEoaUsdcBalance().then(setEoaBalance).catch(() => setEoaBalance(0));
+    dispatch({ type: 'OPEN_DEPOSIT' });
   };
 
   const handleEnableTrading = async () => {

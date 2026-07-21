@@ -16,6 +16,7 @@ import MarketDetail from './screens/MarketDetail';
 import BiometricGate from './components/BiometricGate';
 import InstallPrompt from './components/InstallPrompt';
 import CashOutSheet from './components/CashOutSheet';
+import DepositSheet from './components/DepositSheet';
 
 /** Soft ambient washes so Liquid Glass chrome has something to refract. */
 function AmbientField() {
@@ -75,6 +76,7 @@ export default function App() {
             )}
             {state.ticket && <TicketSheet />}
             {state.cashOutOpen && <CashOutSheet onClose={() => dispatch({ type: 'CLOSE_CASH_OUT' })} />}
+            {state.depositOpen && <DepositSheet onClose={() => dispatch({ type: 'CLOSE_DEPOSIT' })} />}
             {state.toast && <Toast />}
           </div>
         </div>

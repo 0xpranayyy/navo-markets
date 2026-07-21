@@ -1,4 +1,15 @@
 import http from 'node:http';
+
+// Vite only exposes VITE_* vars to the client; this Node process must load
+// .env.local itself to get the POLYMARKET_BUILDER_* credentials.
+for (const file of ['.env.local', '.env']) {
+  try {
+    process.loadEnvFile(file);
+  } catch {
+    // file missing — fine
+  }
+}
+
 import {
   buildHmacSignature,
   getBuilderCreds,
