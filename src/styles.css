@@ -144,36 +144,20 @@ html.navo-standalone.navo-keyboard-open #root {
 .navo-tab-bar-host {
   flex-shrink: 0;
   margin-top: auto;
+  padding: 6px 16px 0;
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
   z-index: 100;
   background: transparent;
 }
 
-/* HIG tab bar: full-bleed translucent chrome + home-indicator padding */
+/* Floating Liquid Glass pill */
 .navo-tab-bar {
+  position: relative;
+  border-radius: 9999px;
+  overflow: hidden;
+  padding: 5px 6px;
   display: flex;
   justify-content: space-around;
-  align-items: stretch;
-  min-height: 49px;
-  padding: 4px 0 calc(env(safe-area-inset-bottom, 0px));
-}
-
-.navo-tab-item {
-  flex: 1;
-  min-width: 0;
-  min-height: 44px;
-  margin: 0;
-  padding: 2px 4px 4px;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0;
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
 }
 
 html.navo-standalone .navo-tab-bar-host {
@@ -182,6 +166,7 @@ html.navo-standalone .navo-tab-bar-host {
   right: 0;
   bottom: 0;
   margin: 0;
+  padding: 8px 16px calc(env(safe-area-inset-bottom, 0px) + 4px);
   z-index: 100;
 }
 
