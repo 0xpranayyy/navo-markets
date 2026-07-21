@@ -9,8 +9,8 @@ export function LargeTitle({ children, trailing, compact }: { children: ReactNod
   return (
     <div style={{
       padding: compact
-        ? 'calc(var(--navo-safe-top) + 6px) 20px 4px'
-        : 'calc(var(--navo-safe-top) + 8px) 20px 6px',
+        ? 'max(var(--navo-safe-top), 8px) 20px 4px'
+        : 'max(var(--navo-safe-top), 12px) 20px 6px',
       display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12,
     }}>
       <div style={{ ...iosType.largeTitle, color: C.text, ...(compact ? { fontSize: 28, letterSpacing: -0.5 } : {}) }}>

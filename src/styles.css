@@ -23,7 +23,6 @@
 html {
   height: 100%;
   height: var(--navo-vh, 100dvh);
-  min-height: -webkit-fill-available;
   color-scheme: dark light;
   font-family: -apple-system, 'SF Pro Display', 'Space Grotesk', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -44,29 +43,32 @@ html, body, #root {
 body, #root {
   height: 100%;
   height: var(--navo-vh, 100dvh);
-  min-height: -webkit-fill-available;
 }
 
-/* Installed PWA — fill the physical screen; do NOT set a pixel height (causes letterboxing). */
-@media (display-mode: standalone), (display-mode: fullscreen) {
-  html, body, #root {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    overflow: hidden;
-    overscroll-behavior: none;
-    touch-action: manipulation;
-  }
+/* ── Installed PWA: fixed shell fills physical screen (iOS ignores dvh / display-mode) ── */
+html.navo-standalone {
+  --navo-vh: 100%;
+  background: #000000;
+  height: 100%;
+  overflow: hidden;
 }
 
-html.navo-standalone,
-html.navo-standalone body,
+[data-theme="light"] html.navo-standalone {
+  background: #F4F5F7;
+}
+
+html.navo-standalone body {
+  height: 100%;
+  overflow: hidden;
+  background: inherit;
+}
+
 html.navo-standalone #root {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   height: auto;
   min-height: 0;
@@ -76,18 +78,16 @@ html.navo-standalone #root {
   touch-action: manipulation;
 }
 
-html.navo-standalone.navo-keyboard-open,
-html.navo-standalone.navo-keyboard-open body,
 html.navo-standalone.navo-keyboard-open #root {
-  height: var(--navo-vh, 100dvh);
+  top: auto;
+  height: var(--navo-app-h, 100%);
+  max-height: var(--navo-app-h, 100%);
 }
 
-/* Full-screen native shell — edge-to-edge on installed iOS/Android PWAs */
 .navo-app-shell {
   width: 100%;
   height: 100%;
   height: var(--navo-vh, 100dvh);
-  min-height: -webkit-fill-available;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -95,27 +95,8 @@ html.navo-standalone.navo-keyboard-open #root {
 }
 
 html.navo-standalone .navo-app-shell {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: auto;
+  height: 100%;
   min-height: 0;
-}
-
-@media (display-mode: standalone), (display-mode: fullscreen) {
-  .navo-app-shell {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: auto;
-    min-height: 0;
-  }
-}
-
-html.navo-standalone.navo-keyboard-open .navo-app-shell {
-  top: 0;
-  bottom: auto;
-  height: var(--navo-vh, 100dvh);
 }
 
 .navo-app-frame {
@@ -123,39 +104,29 @@ html.navo-standalone.navo-keyboard-open .navo-app-shell {
   flex: 1;
   min-height: 0;
   width: 100%;
-  max-width: 430px;
-  margin: 0 auto;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* Desktop browser: centered phone frame */
+@media (min-width: 431px) {
+  .navo-app-shell:not(.navo-app-shell--native) {
+    align-items: center;
+  }
+
+  html:not(.navo-standalone) .navo-app-frame {
+    max-width: 430px;
+    margin: 0 auto;
+  }
 }
 
 html.navo-standalone .navo-app-frame {
   max-width: none;
   margin: 0;
   flex: 1;
-  min-height: 0;
   height: 100%;
-}
-
-@media (display-mode: standalone), (display-mode: fullscreen) {
-  .navo-app-frame {
-    max-width: none;
-    margin: 0;
-    flex: 1;
-    min-height: 0;
-    height: 100%;
-  }
-
-  html, body, #root {
-    background: #000000;
-  }
-
-  [data-theme="light"] html,
-  [data-theme="light"] body,
-  [data-theme="light"] #root {
-    background: #F4F5F7;
-  }
 }
 
 .navo-app-stage {
@@ -193,18 +164,27 @@ html.navo-standalone .navo-app-frame {
 
 .navo-tab-bar-host {
   flex-shrink: 0;
-  padding: 4px 16px max(8px, env(safe-area-inset-bottom, 0px));
-  z-index: 100;
-}
-
-html.navo-standalone .navo-tab-bar-host {
+  padding: 6px 16px 0;
   padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  z-index: 100;
+  background: transparent;
 }
 
-@media (display-mode: standalone), (display-mode: fullscreen) {
-  .navo-tab-bar-host {
-    padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
-  }
+/* Pin tab bar to physical bottom in installed mode */
+html.navo-standalone .navo-tab-bar-host {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  flex-shrink: 0;
+  padding: 6px 16px 0;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+}
+
+html.navo-standalone .navo-tab-content {
+  flex: 1;
+  min-height: 0;
+  padding-bottom: var(--navo-tab-bar-clearance);
 }
 
 .navo-tab-bar {

@@ -1,5 +1,6 @@
 import { useApp } from './store/AppContext';
 import { useTheme } from './theme';
+import { isStandalonePwa } from './utils/pwa';
 import OfflineBanner from './components/OfflineBanner';
 import Landing from './components/Landing';
 import Onboarding from './components/Onboarding';
@@ -47,8 +48,11 @@ export default function App() {
 
   return (
     <BiometricGate>
-      <div className="navo-app-shell" style={{ background: C.bg }}>
-        <div className="navo-app-frame" style={{ background: C.bg }}>
+      <div
+        className={`navo-app-shell${isStandalonePwa() ? ' navo-app-shell--native' : ''}`}
+        style={{ background: C.bg, height: '100%' }}
+      >
+        <div className="navo-app-frame" style={{ background: C.bg, height: '100%' }}>
           <AmbientField />
           <div className="navo-app-stage">
             <OfflineBanner />
