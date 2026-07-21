@@ -1,0 +1,248 @@
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+html {
+  color-scheme: dark light;
+  --navo-blue: #0A84FF;
+  --navo-blue-deep: #0A4DB5;
+  --navo-sky: #4DA3FF;
+  --navo-bg: #000000;
+  --navo-surface: #1C1E22;
+  --navo-hairline: #26282C;
+  --navo-paper: #F4F5F7;
+  --navo-yes: #34C759;
+  --navo-no: #FF453A;
+  --navo-text-secondary: #8B93A7;
+  --navo-text-tertiary: #6B7280;
+}
+body {
+  margin: 0;
+  font-family: -apple-system, 'SF Pro Display', 'Space Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background-color 0.28s ease, color 0.28s ease;
+  letter-spacing: -0.01em;
+}
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+  font-family: inherit;
+}
+
+@media (display-mode: standalone) {
+  html, body, #root { height: 100%; height: 100dvh; }
+}
+
+a { text-decoration: none; }
+
+[data-theme="dark"] input::placeholder { color: rgba(235, 235, 245, 0.38); }
+[data-theme="light"] input::placeholder { color: rgba(60, 60, 67, 0.4); }
+
+[data-theme="dark"] a { color: #0a84ff; }
+[data-theme="dark"] a:hover { color: #409cff; }
+[data-theme="light"] a { color: #007aff; }
+[data-theme="light"] a:hover { color: #0062cc; }
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+.pressable {
+  transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.18s ease, background 0.18s ease;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.pressable:active { transform: scale(0.97); }
+.pressable-sm:active { transform: scale(0.92); }
+
+[data-theme="dark"] .pressable-key:active { transform: scale(0.94); background: rgba(255, 255, 255, 0.14) !important; }
+[data-theme="light"] .pressable-key:active { transform: scale(0.94); background: rgba(0, 0, 0, 0.08) !important; }
+
+/* Liquid Glass helpers */
+.liquid-chrome {
+  isolation: isolate;
+}
+.liquid-card {
+  transition: transform 0.22s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.22s ease;
+}
+.liquid-card:active {
+  transform: scale(0.985);
+}
+
+@keyframes om-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes om-fadeslide {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes om-slideright {
+  from { transform: translateX(100%); opacity: 0.92; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes om-sheetup {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+@keyframes om-toast {
+  from { opacity: 0; transform: translateY(-18px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes om-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes om-float-0 {
+  0%, 100% { transform: rotate(-1.5deg) translateY(0); }
+  50% { transform: rotate(-1.5deg) translateY(-6px); }
+}
+@keyframes om-float-1 {
+  0%, 100% { transform: rotate(1.2deg) translateY(0); }
+  50% { transform: rotate(1.2deg) translateY(-8px); }
+}
+@keyframes om-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
+}
+
+.anim-fade { animation: om-fade 0.38s cubic-bezier(0.32, 0.72, 0, 1); }
+.anim-fadeslide { animation: om-fadeslide 0.36s cubic-bezier(0.32, 0.72, 0, 1); }
+.anim-slideright { animation: om-slideright 0.42s cubic-bezier(0.32, 0.72, 0, 1); }
+.anim-sheetup { animation: om-sheetup 0.44s cubic-bezier(0.32, 0.72, 0, 1); }
+.anim-toast { animation: om-toast 0.48s cubic-bezier(0.32, 0.72, 0, 1); }
+.anim-float-0 { animation: om-float-0 4s ease-in-out infinite; }
+.anim-float-1 { animation: om-float-1 4.6s ease-in-out infinite; }
+.anim-live-dot { animation: om-live-pulse 1.8s ease-in-out infinite; }
+
+@keyframes om-skeleton { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.85; } }
+.anim-skeleton { animation: om-skeleton 1.35s ease-in-out infinite; }
+
+/* Navo marketing — gradient hero & mesh backdrop */
+.navo-hero-gradient {
+  background: linear-gradient(135deg, var(--navo-hero-from, #F5F6F7) 0%, var(--navo-hero-mid, #4DA3FF) 48%, var(--navo-hero-to, #0A84FF) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-theme="light"] .navo-hero-gradient {
+  --navo-hero-from: #0A0A0B;
+  --navo-hero-mid: #1A5FB4;
+  --navo-hero-to: #0A84FF;
+}
+[data-theme="dark"] .navo-hero-gradient {
+  --navo-hero-from: #FFFFFF;
+  --navo-hero-mid: #64B5FF;
+  --navo-hero-to: #0A84FF;
+}
+
+.navo-mesh-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(10, 132, 255, 0.18), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 85% 15%, rgba(52, 199, 89, 0.08), transparent 50%),
+    radial-gradient(ellipse 70% 40% at 50% 100%, rgba(77, 163, 255, 0.12), transparent 55%);
+}
+[data-theme="light"] .navo-mesh-bg {
+  opacity: 0.35;
+}
+
+.navo-trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--navo-text-tertiary);
+}
+.navo-trust-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.navo-trust-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--navo-blue);
+  opacity: 0.7;
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .liquid-chrome, .liquid-card {
+    /* Prefer GPU compositing for blur layers */
+    will-change: transform;
+  }
+}
+
+/* iOS-native scroll feel */
+.ios-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+}
+.ios-scroll:focus { outline: none; }
+
+/* Hairline separators that stay crisp on Retina */
+.ios-hairline {
+  height: 0.33px;
+  background: var(--ios-divider, rgba(60, 60, 67, 0.29));
+  transform: scaleY(1);
+}
+
+/* Large title collapse feel */
+.ios-large-title {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 1.05;
+}
+
+/* HIG — minimum 44×44pt touch targets */
+.ios-hit-44 {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Tabular numbers for financial data */
+.ios-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* List row active state */
+.ios-list-row:active {
+  background: var(--ios-row-active, rgba(120, 120, 128, 0.16));
+}
+[data-theme="light"] .ios-list-row:active {
+  --ios-row-active: rgba(120, 120, 128, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pressable:active,
+  .pressable-sm:active,
+  .liquid-card:active {
+    transform: none;
+  }
+  .anim-fade, .anim-fadeslide, .anim-slideright, .anim-sheetup, .anim-toast {
+    animation: none;
+  }
+  .ios-scroll {
+    scroll-behavior: auto;
+  }
+}
+
+.auth-btn {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.auth-btn:disabled {
+  cursor: wait;
+}
+.auth-btn-apple {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+[data-theme="dark"] .auth-btn-apple {
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.12);
+}

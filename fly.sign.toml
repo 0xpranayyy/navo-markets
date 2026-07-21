@@ -1,0 +1,27 @@
+# fly launch --config fly.sign.toml --name navo-sign --no-deploy
+# fly secrets set POLYMARKET_BUILDER_API_KEY=... POLYMARKET_BUILDER_SECRET=... POLYMARKET_BUILDER_PASSPHRASE=...
+# fly deploy --config fly.sign.toml
+
+app = "navo-sign"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile.sign"
+
+[env]
+  SIGN_PORT = "8787"
+  HOST = "0.0.0.0"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/health"
+    timeout = "5s"

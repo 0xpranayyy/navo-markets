@@ -1,0 +1,51 @@
+{
+  "name": "navo",
+  "description": "Enterprise-grade Polymarket prediction markets PWA — iOS-native UI, Privy auth, Gnosis Safe trading",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "keywords": ["polymarket", "prediction-markets", "pwa", "privy", "react", "typescript"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xpranayyy/navo-markets.git"
+  },
+  "homepage": "https://navomarkets.vercel.app",
+  "scripts": {
+    "dev": "concurrently -k \"node server/sign.mjs\" \"vite\"",
+    "dev:app": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:android": "npm run cap:sync && npx cap open android",
+    "cap:ios": "npm run cap:sync && npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.6.8",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.6.8",
+    "@capacitor/push-notifications": "^7.0.0",
+    "@polymarket/builder-relayer-client": "^0.0.10",
+    "@polymarket/builder-signing-sdk": "^1.0.0",
+    "@polymarket/clob-client-v2": "^1.1.0",
+    "@privy-io/react-auth": "^3.35.1",
+    "concurrently": "^9.2.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "viem": "^2.52.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "sharp": "^0.35.3",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.1",
+    "vite-plugin-pwa": "^0.21.1",
+    "vitest": "^3.0.5"
+  }
+}

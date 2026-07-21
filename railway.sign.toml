@@ -1,0 +1,9 @@
+# Deploy sign server: railway up --service navo-sign -c railway.sign.toml
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.sign"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
