@@ -47,22 +47,21 @@ export default function App() {
 
   return (
     <BiometricGate>
-      <div style={{ height: '100%', display: 'flex', justifyContent: 'center', background: C.bgDeep }}>
-        <div style={{
-          position: 'relative', width: '100%', maxWidth: 430, height: '100%', overflow: 'hidden',
-          background: C.bg,
-        }}>
+      <div className="navo-app-shell" style={{ background: C.bgDeep }}>
+        <div className="navo-app-frame" style={{ background: C.bg }}>
           <AmbientField />
-          <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
+          <div className="navo-app-stage">
             <OfflineBanner />
             {state.phase === 'landing' && <Landing />}
             {state.phase === 'onboarding' && <Onboarding />}
             {state.phase === 'app' && (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
-                {state.tab === 'markets' && <MarketsScreen />}
-                {state.tab === 'search' && <SearchScreen />}
-                {state.tab === 'portfolio' && <PortfolioScreen />}
-                {state.tab === 'profile' && <ProfileScreen />}
+              <div className="navo-app-tabs">
+                <div className="navo-tab-content">
+                  {state.tab === 'markets' && <MarketsScreen />}
+                  {state.tab === 'search' && <SearchScreen />}
+                  {state.tab === 'portfolio' && <PortfolioScreen />}
+                  {state.tab === 'profile' && <ProfileScreen />}
+                </div>
                 <TabBar />
                 {state.selectedId && <MarketDetail />}
                 {state.settingsOpen && <SettingsScreen />}

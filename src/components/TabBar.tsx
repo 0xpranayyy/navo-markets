@@ -1,6 +1,6 @@
 import { useApp } from '../store/AppContext';
 import { useTheme } from '../theme';
-import { iosLayout, iosType } from '../theme/typography';
+import { iosType } from '../theme/typography';
 import type { Tab } from '../types';
 import { hapticLight } from '../utils/haptics';
 
@@ -58,79 +58,71 @@ export default function TabBar() {
   };
 
   return (
-    <div
-      className="liquid-chrome"
-      style={{
-        position: 'absolute',
-        left: 16,
-        right: 16,
-        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
-        zIndex: 100,
-        borderRadius: 9999,
-        overflow: 'hidden',
-        padding: '5px 6px',
-        display: 'flex',
-        justifyContent: 'space-around',
-        boxShadow: resolved === 'dark'
-          ? '0 14px 36px rgba(0,0,0,0.42), 0 2px 8px rgba(0,0,0,0.18)'
-          : '0 10px 28px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)',
-      }}
-    >
-      <div style={{
-        position: 'absolute', inset: 0,
-        backdropFilter: 'blur(40px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-        background: C.tabBarBg,
-      }} />
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: 9999,
-        boxShadow: C.tabBarShine,
-        border: `0.5px solid ${C.tabBarBorder}`,
-        pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', top: 0, left: '14%', right: '14%', height: 1,
-        background: resolved === 'dark'
-          ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
-          : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent)',
-        pointerEvents: 'none', opacity: 0.85,
-      }} />
-      {TABS.map((t) => {
-        const active = state.tab === t.id;
-        const color = active ? C.blue : C.tabInactive;
-        return (
-          <div
-            key={t.id}
-            className="pressable pressable-sm ios-hit-44"
-            onClick={() => go(t.id)}
-            role="tab"
-            aria-selected={active}
-            style={{
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 1,
-              padding: '4px 10px',
-              minWidth: 68,
-              borderRadius: 9999,
-              background: active ? C.tabActiveBg : 'transparent',
-              transition: 'background 0.22s cubic-bezier(0.32, 0.72, 0, 1)',
-            }}
-          >
-            {t.icon(color, active)}
-            <span style={{
-              ...iosType.tabLabel,
-              fontWeight: active ? 600 : 500,
-              color,
-              marginTop: 1,
-            }}>
-              {t.label}
-            </span>
-          </div>
-        );
-      })}
+    <div className="navo-tab-bar-host">
+      <div
+        className="navo-tab-bar liquid-chrome"
+        style={{
+          boxShadow: resolved === 'dark'
+            ? '0 14px 36px rgba(0,0,0,0.42), 0 2px 8px rgba(0,0,0,0.18)'
+            : '0 10px 28px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)',
+        }}
+      >
+        <div style={{
+          position: 'absolute', inset: 0,
+          backdropFilter: 'blur(40px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+          background: C.tabBarBg,
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0, borderRadius: 9999,
+          boxShadow: C.tabBarShine,
+          border: `0.5px solid ${C.tabBarBorder}`,
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', top: 0, left: '14%', right: '14%', height: 1,
+          background: resolved === 'dark'
+            ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
+            : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent)',
+          pointerEvents: 'none', opacity: 0.85,
+        }} />
+        {TABS.map((t) => {
+          const active = state.tab === t.id;
+          const color = active ? C.blue : C.tabInactive;
+          return (
+            <div
+              key={t.id}
+              className="pressable pressable-sm ios-hit-44"
+              onClick={() => go(t.id)}
+              role="tab"
+              aria-selected={active}
+              style={{
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                padding: '4px 10px',
+                minWidth: 68,
+                borderRadius: 9999,
+                background: active ? C.tabActiveBg : 'transparent',
+                transition: 'background 0.22s cubic-bezier(0.32, 0.72, 0, 1)',
+              }}
+            >
+              {t.icon(color, active)}
+              <span style={{
+                ...iosType.tabLabel,
+                fontWeight: active ? 600 : 500,
+                color,
+                marginTop: 1,
+              }}>
+                {t.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

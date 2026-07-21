@@ -8,6 +8,31 @@ export function isStandalonePwa(): boolean {
   );
 }
 
+/** Lock viewport height and mark standalone mode for native iOS shell layout. */
+export function initPwaLayout(): void {
+  if (typeof document === 'undefined') return;
+
+  const root = document.documentElement;
+
+  const syncStandalone = () => {
+    root.classList.toggle('navo-standalone', isStandalonePwa());
+  };
+
+  const syncViewportHeight = () => {
+    const h = window.visualViewport?.height ?? window.innerHeight;
+    root.style.setProperty('--navo-vh', `${Math.round(h)}px`);
+  };
+
+  syncStandalone();
+  syncViewportHeight();
+
+  window.addEventListener('resize', syncViewportHeight);
+  window.addEventListener('orientationchange', syncViewportHeight);
+  window.visualViewport?.addEventListener('resize', syncViewportHeight);
+  window.visualViewport?.addEventListener('scroll', syncViewportHeight);
+  window.matchMedia('(display-mode: standalone)').addEventListener('change', syncStandalone);
+}
+
 export function isIos(): boolean {
   if (typeof navigator === 'undefined') return false;
   return (

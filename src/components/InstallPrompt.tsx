@@ -60,7 +60,7 @@ export default function InstallPrompt() {
 
   return (
     <div className="liquid-chrome anim-fadeslide" style={{
-      position: 'absolute', left: 14, right: 14, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 78px)',
+      position: 'absolute', left: 14, right: 14, bottom: 'calc(var(--navo-tab-bar-clearance) + 8px)',
       zIndex: 200, borderRadius: 20, padding: '14px 16px',
       ...sheet,
       display: 'flex', gap: 12, alignItems: 'flex-start',

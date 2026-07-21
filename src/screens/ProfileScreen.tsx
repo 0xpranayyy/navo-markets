@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { useApp } from '../store/AppContext';
 import { useAuth } from '../auth/AuthProvider';
+import { api } from '../api/client';
 import { deriveSafeAddress, loadTradingSession } from '../api/trading/session';
 import { copyText } from '../utils/clipboard';
 import { clearSession } from '../utils/storage';
@@ -9,9 +11,15 @@ import { iosLayout, iosType } from '../theme/typography';
 
 export default function ProfileScreen() {
   const { state, dispatch, refreshPortfolio, setupTrading, transferToSafe, withdrawToEoa } = useApp();
-  const { user, authenticated, login, logout, fundWallet } = useAuth();
+  const { user, authenticated, ready, login, logout, fundWallet } = useAuth();
   const { colors: C } = useTheme();
+  const [builderReady, setBuilderReady] = useState<boolean | null>(null);
 
+  useEffect(() => {
+    api.isBuilderConfigured().then(setBuilderReady).catch(() => setBuilderReady(false));
+  }, []);
+
+  const walletLoading = authenticated && !ready;
   const tradingReady = Boolean(user?.address && loadTradingSession(user.address)?.ready);
   const safeAddress = user?.safeAddress
     ?? (user?.address ? (loadTradingSession(user.address)?.safeAddress ?? deriveSafeAddress(user.address)) : null);
@@ -54,7 +62,7 @@ export default function ProfileScreen() {
       </LargeTitle>
 
       <div className="no-scrollbar ios-scroll" style={{
-        flex: 1, overflowY: 'auto', padding: `8px ${iosLayout.screenMargin}px 120px`,
+        flex: 1, overflowY: 'auto', padding: `8px ${iosLayout.screenMargin}px 24px`,
         WebkitOverflowScrolling: 'touch',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 22, padding: '4px 4px 0' }}>
@@ -69,7 +77,11 @@ export default function ProfileScreen() {
           <div style={{ minWidth: 0 }}>
             <div style={{ ...iosType.title2, color: C.text }}>{user?.name ?? 'Guest'}</div>
             <div style={{ ...iosType.subheadline, color: C.sub, marginTop: 2 }}>
-              {authenticated ? `${formatCash(state.cash)} available` : 'Not signed in'}
+              {walletLoading
+                ? 'Wallet loading…'
+                : authenticated
+                  ? `${formatCash(state.cash)} available`
+                  : 'Not signed in'}
             </div>
             {user?.address && (
               <div
@@ -91,6 +103,20 @@ export default function ProfileScreen() {
 
         {authenticated && (
           <>
+            {builderReady === false && (
+              <div style={{
+                borderRadius: 14, padding: 14, marginBottom: 16,
+                background: C.redBg, border: `0.5px solid ${C.red}33`,
+              }}>
+                <div style={{ fontSize: 15, fontWeight: 650, color: C.red, marginBottom: 4 }}>Trading not configured</div>
+                <div style={{ fontSize: 13, color: C.sub, lineHeight: 1.45 }}>
+                  {import.meta.env.DEV
+                    ? <>Add builder credentials to <code style={{ color: C.faint }}>.env.local</code> and run <code style={{ color: C.faint }}>npm run dev</code>.</>
+                    : <>Sign server unreachable. Set builder env vars on Vercel.</>}
+                </div>
+              </div>
+            )}
+
             <SectionHeader>Trading</SectionHeader>
             <GroupedList style={{ marginBottom: 22 }}>
               <ListRow
@@ -112,7 +138,20 @@ export default function ProfileScreen() {
               )}
               {!tradingReady && (
                 <div style={{ padding: 12 }}>
-                  <PrimaryButton label="Enable Trading" onClick={() => void setupTrading()} color={C.blue} />
+                  <PrimaryButton
+                    label={
+                      state.settingUpTrading
+                        ? 'Setting up…'
+                        : walletLoading
+                          ? 'Wallet loading…'
+                          : builderReady === false
+                            ? 'Configure builder first'
+                            : 'Enable Trading'
+                    }
+                    onClick={() => void setupTrading()}
+                    color={C.blue}
+                    disabled={state.settingUpTrading || walletLoading || builderReady === false}
+                  />
                 </div>
               )}
             </GroupedList>

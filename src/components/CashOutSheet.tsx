@@ -56,7 +56,7 @@ export default function CashOutSheet({ onClose }: { onClose: () => void }) {
         ...sheet,
         borderRadius: '24px 24px 0 0',
         borderBottom: 'none',
-        padding: '12px 20px calc(env(safe-area-inset-bottom, 0px) + 24px)',
+        padding: '12px 20px calc(var(--navo-safe-bottom) + 24px)',
       }}>
         <div style={{ width: 40, height: 5, borderRadius: 9999, background: C.sheetHandle, margin: '0 auto 16px' }} />
         <div style={{ fontSize: 22, fontWeight: 800, color: C.text, marginBottom: 6 }}>Cash out</div>

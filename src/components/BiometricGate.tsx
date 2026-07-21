@@ -24,10 +24,15 @@ export default function BiometricGate({ children }: { children: React.ReactNode 
   if (!locked) return <>{children}</>;
 
   return (
-    <div style={{ height: '100%', display: 'flex', justifyContent: 'center', background: C.bgDeep }}>
-      <div style={{
-        width: '100%', maxWidth: 430, height: '100%', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', background: C.bg, padding: 32, gap: 16,
+    <div className="navo-app-shell" style={{ background: C.bgDeep }}>
+      <div className="navo-app-frame" style={{
+        background: C.bg,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: `calc(var(--navo-safe-top) + 32px) 32px calc(var(--navo-safe-bottom) + 32px)`,
+        gap: 16,
       }}>
         <NavoMark size={56} />
         <div style={{ fontSize: 22, fontWeight: 800, color: C.text }}>Navo is locked</div>

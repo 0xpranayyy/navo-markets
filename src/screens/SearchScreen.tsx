@@ -61,7 +61,7 @@ export default function SearchScreen() {
       />
 
       <div className="no-scrollbar ios-scroll" style={{
-        flex: 1, overflowY: 'auto', padding: `0 ${iosLayout.screenMargin}px 120px`,
+        flex: 1, overflowY: 'auto', padding: `0 ${iosLayout.screenMargin}px 24px`,
         WebkitOverflowScrolling: 'touch',
       }}>
         {q === '' ? (

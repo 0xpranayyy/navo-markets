@@ -270,7 +270,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const toastTimer = useRef<number>();
   const routeHydrated = useRef(false);
   const refreshOpenOrdersRef = useRef<() => Promise<void>>(async () => {});
-  const { authenticated, ready, login } = useAuth();
+  const { authenticated, ready, login, waitForWalletProfile } = useAuth();
   const { colors: C } = useTheme();
 
   const toast = (t: ToastMsg) => dispatch({ type: 'SHOW_TOAST', toast: t });
@@ -458,7 +458,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setupTrading = async () => {
-    if (!authenticated) await login();
+    if (!authenticated) {
+      const profile = await login();
+      if (!profile) {
+        toast({ title: 'Sign in required', msg: 'Connect your wallet to enable trading', variant: 'info' });
+        return;
+      }
+    } else if (!ready) {
+      const profile = await waitForWalletProfile();
+      if (!profile) {
+        toast({
+          title: 'Wallet not ready',
+          msg: 'Your embedded wallet is still loading. Wait a few seconds and try again.',
+          variant: 'error',
+        });
+        return;
+      }
+    }
+
     const builderReady = await api.isBuilderConfigured();
     if (!builderReady) {
       toast({
@@ -497,8 +514,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const transferToSafe = async () => {
     if (!authenticated) {
-      await login();
-      return;
+      const profile = await login();
+      if (!profile) return;
+    } else if (!ready) {
+      const profile = await waitForWalletProfile();
+      if (!profile) {
+        toast({ title: 'Wallet not ready', msg: 'Wait a moment and try again.', variant: 'error' });
+        return;
+      }
     }
     try {
       const amount = await api.transferDepositToSafe();
@@ -518,8 +541,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const withdrawToEoa = async (amountUsd?: number) => {
     if (!authenticated) {
-      await login();
-      return;
+      const profile = await login();
+      if (!profile) return;
+    } else if (!ready) {
+      const profile = await waitForWalletProfile();
+      if (!profile) {
+        toast({ title: 'Wallet not ready', msg: 'Wait a moment and try again.', variant: 'error' });
+        return;
+      }
     }
     try {
       const amount = await api.withdrawToEoa(amountUsd);
@@ -653,12 +682,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!builderReady) {
         toast({ title: 'Trading unavailable', msg: 'Builder credentials or sign server not configured', variant: 'error' });
         return;
-      }
-
-      try {
-        await api.setupTrading();
-      } catch {
-        // Session may already exist; placeOrder will surface errors.
       }
 
       const res = await api.placeOrder({

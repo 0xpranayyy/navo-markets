@@ -22,7 +22,6 @@ import {
 import {
   getActiveSafeAddress,
   getTradingClient,
-  initializeTradingSession,
   syncCollateralBalance,
   type SetupStep,
 } from './trading/session';
@@ -79,10 +78,18 @@ class PolymarketApiClient implements ApiClient {
   private async wallet() {
     const bridge = getAuthBridge();
     if (!bridge?.isAuthenticated()) throw new Error('Sign in to trade');
+
+    if (!bridge.isReady()) {
+      throw new Error('Wallet is still loading. Wait a moment and try again.');
+    }
+
+    const user = bridge.getUser() ?? await bridge.waitForWallet();
+    if (!user?.address) {
+      throw new Error('No wallet available. Sign out and sign in again, or wait a few seconds.');
+    }
+
     const walletClient = await bridge.getWalletClient();
-    if (!walletClient) throw new Error('No wallet available');
-    const user = bridge.getUser();
-    if (!user?.address) throw new Error('No wallet address');
+    if (!walletClient) throw new Error('Could not connect wallet');
     return { walletClient, eoaAddress: user.address };
   }
 
@@ -152,8 +159,8 @@ class PolymarketApiClient implements ApiClient {
 
   async setupTrading(onStep?: (step: SetupStep) => void): Promise<string> {
     const { walletClient, eoaAddress } = await this.wallet();
-    const session = await initializeTradingSession(eoaAddress, walletClient, onStep);
-    return session.safeAddress;
+    const { safeAddress } = await getTradingClient(eoaAddress, walletClient, onStep);
+    return safeAddress;
   }
 
   async placeOrder(req: PlaceOrderRequest): Promise<PlaceOrderResult> {

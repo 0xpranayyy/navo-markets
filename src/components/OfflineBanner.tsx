@@ -10,7 +10,7 @@ export default function OfflineBanner() {
   return (
     <div style={{
       position: 'absolute',
-      top: 'calc(env(safe-area-inset-top, 0px) + 4px)',
+      top: 'calc(var(--navo-safe-top) + 4px)',
       left: 12,
       right: 12,
       zIndex: 500,

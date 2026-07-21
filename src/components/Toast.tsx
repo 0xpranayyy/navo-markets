@@ -33,7 +33,7 @@ export default function Toast() {
       onClick={() => dispatch({ type: 'HIDE_TOAST' })}
       style={{
         position: 'absolute',
-        top: 'calc(env(safe-area-inset-top, 0px) + 14px)',
+        top: 'calc(var(--navo-safe-top) + 14px)',
         left: 16, right: 16, zIndex: 400,
         background: C.toastBg,
         backdropFilter: 'blur(36px) saturate(180%)',

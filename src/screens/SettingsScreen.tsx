@@ -84,7 +84,7 @@ export default function SettingsScreen() {
         display: 'flex', flexDirection: 'column',
       }}>
         <div style={{
-          padding: 'calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px',
+          padding: 'calc(var(--navo-safe-top) + 10px) 16px 10px',
           display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0,
         }}>
           <NavIconButton label="Back" onClick={close}>
@@ -99,7 +99,7 @@ export default function SettingsScreen() {
 
         <div className="no-scrollbar ios-scroll" style={{
           flex: 1, overflowY: 'auto',
-          padding: '8px 16px calc(env(safe-area-inset-bottom, 0px) + 32px)',
+          padding: '8px 16px calc(var(--navo-safe-bottom) + 32px)',
           WebkitOverflowScrolling: 'touch',
         }}>
           <div style={{ ...sectionLabel, margin: '8px 4px 8px' }}>Appearance</div>

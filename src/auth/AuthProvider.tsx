@@ -84,8 +84,12 @@ function PrivyAuthBridge({ children }: { children: React.ReactNode }) {
 
   const getWalletClientInner = useCallback(async (): Promise<WalletClient | null> => {
     const wallet = walletsRef.current.find((w) => w.walletClientType === 'privy') ?? walletsRef.current[0];
-    if (!wallet) return null;
-    await wallet.switchChain(polygon.id);
+    if (!wallet?.address) return null;
+    try {
+      await wallet.switchChain(polygon.id);
+    } catch {
+      // Privy embedded wallets may already be on Polygon.
+    }
     const provider = await wallet.getEthereumProvider();
     walletClientRef.current = createWalletClient({
       account: wallet.address as `0x${string}`,
@@ -157,12 +161,14 @@ function PrivyAuthBridge({ children }: { children: React.ReactNode }) {
       login,
       logout,
       getUser: () => profile,
+      waitForWallet: waitForWalletProfile,
       getWalletClient,
       isAuthenticated: () => authenticated,
+      isReady: () => ready && walletsReady,
     };
     setAuthBridge(bridge);
     return () => setAuthBridge(null);
-  }, [authenticated, getWalletClient, login, logout, profile]);
+  }, [authenticated, getWalletClient, login, logout, profile, ready, waitForWalletProfile, walletsReady]);
 
   const value: AuthContextValue = {
     user: profile,

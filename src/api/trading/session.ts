@@ -155,6 +155,20 @@ export async function initializeTradingSession(
   walletClient: WalletClient,
   onStep?: (step: SetupStep) => void,
 ): Promise<StoredTradingSession> {
+  const stored = loadTradingSession(eoaAddress);
+  if (stored?.ready) {
+    onStep?.('relay');
+    const relay = new RelayClient(RELAYER_URL, POLYGON_CHAIN_ID, walletClient, builderConfig(walletClient) as never);
+    const deployed = await relay.getDeployed(stored.safeAddress);
+    if (deployed) {
+      activeClient = createTradingClient(walletClient, stored.apiCredentials, stored.safeAddress);
+      activeSafe = stored.safeAddress;
+      onStep?.('done');
+      return stored;
+    }
+    clearTradingSession(eoaAddress);
+  }
+
   onStep?.('relay');
   const relay = new RelayClient(RELAYER_URL, POLYGON_CHAIN_ID, walletClient, builderConfig(walletClient) as never);
   const safeAddress = deriveSafeAddress(eoaAddress);
@@ -196,6 +210,7 @@ export async function initializeTradingSession(
 export async function getTradingClient(
   eoaAddress: string,
   walletClient: WalletClient,
+  onStep?: (step: SetupStep) => void,
 ): Promise<{ client: ClobClient; safeAddress: string }> {
   if (activeClient && activeSafe) {
     return { client: activeClient, safeAddress: activeSafe };
@@ -203,12 +218,19 @@ export async function getTradingClient(
 
   const stored = loadTradingSession(eoaAddress);
   if (stored?.ready) {
-    activeClient = createTradingClient(walletClient, stored.apiCredentials, stored.safeAddress);
-    activeSafe = stored.safeAddress;
-    return { client: activeClient, safeAddress: activeSafe };
+    onStep?.('relay');
+    const relay = new RelayClient(RELAYER_URL, POLYGON_CHAIN_ID, walletClient, builderConfig(walletClient) as never);
+    const deployed = await relay.getDeployed(stored.safeAddress);
+    if (deployed) {
+      activeClient = createTradingClient(walletClient, stored.apiCredentials, stored.safeAddress);
+      activeSafe = stored.safeAddress;
+      onStep?.('done');
+      return { client: activeClient, safeAddress: activeSafe };
+    }
+    clearTradingSession(eoaAddress);
   }
 
-  const session = await initializeTradingSession(eoaAddress, walletClient);
+  const session = await initializeTradingSession(eoaAddress, walletClient, onStep);
   return { client: activeClient!, safeAddress: session.safeAddress };
 }
 

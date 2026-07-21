@@ -108,10 +108,10 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="anim-fade" style={{ position: 'absolute', inset: 0, background: C.bgDeep, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    <div className="anim-fade navo-phase-screen" style={{ background: C.bgDeep, overflow: 'hidden' }}>
       <BackgroundOrbs resolved={resolved} />
 
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'calc(env(safe-area-inset-top, 0px) + 16px) 20px 0' }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'calc(var(--navo-safe-top) + 16px) 20px 0' }}>
         {step > 0 ? (
           <div className="pressable pressable-sm" onClick={() => setStep(step - 1)}
             style={{ width: 36, height: 36, borderRadius: 9999, background: C.inputBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -153,7 +153,7 @@ export default function Onboarding() {
         )}
       </div>
 
-      <div style={{ position: 'relative', padding: '0 26px calc(env(safe-area-inset-bottom, 0px) + 32px)', flexShrink: 0 }}>
+      <div style={{ position: 'relative', padding: '0 26px calc(var(--navo-safe-bottom) + 32px)', flexShrink: 0 }}>
         <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 20 }}>
           {STEPS.map((_, i) => (
             <div key={i} style={{

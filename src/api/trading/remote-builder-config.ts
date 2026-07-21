@@ -22,21 +22,30 @@ export class RemoteBuilderConfig {
     body?: unknown,
     timestamp?: number,
   ): Promise<BuilderHeaderPayload | undefined> {
-    if (!this.walletClient) return undefined;
-
-    try {
-      const auth = await signBuilderAuth(this.walletClient, method, path);
-      const res = await fetch(this.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ method, path, body, timestamp, ...auth }),
-      });
-      if (!res.ok) return undefined;
-      return (await res.json()) as BuilderHeaderPayload;
-    } catch {
-      return undefined;
+    if (!this.walletClient) {
+      throw new Error('Wallet not connected for builder signing');
     }
+
+    const auth = await signBuilderAuth(this.walletClient, method, path);
+    const res = await fetch(this.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ method, path, body, timestamp, ...auth }),
+    });
+
+    if (!res.ok) {
+      let detail = `Sign server error (${res.status})`;
+      try {
+        const data = (await res.json()) as { error?: string };
+        if (data.error) detail = data.error;
+      } catch {
+        // ignore parse errors
+      }
+      throw new Error(detail);
+    }
+
+    return (await res.json()) as BuilderHeaderPayload;
   }
 
   isValid(): boolean {

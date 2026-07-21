@@ -99,7 +99,7 @@ export default function PortfolioScreen() {
       <LargeTitle>Portfolio</LargeTitle>
       <PullRefreshIndicator pull={pull} refreshing={refreshing} loading={state.loadingPortfolio && authenticated && !state.positions.length} />
       <div className="no-scrollbar ios-scroll" {...handlers} style={{
-        flex: 1, overflowY: 'auto', padding: `8px ${iosLayout.screenMargin}px 120px`,
+        flex: 1, overflowY: 'auto', padding: `8px ${iosLayout.screenMargin}px 24px`,
         WebkitOverflowScrolling: 'touch',
       }}>
         {state.portfolioError && authenticated && (

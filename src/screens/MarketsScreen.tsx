@@ -97,7 +97,7 @@ export default function MarketsScreen() {
         onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 8)}
         style={{
           flex: 1, overflowY: 'auto',
-          padding: `4px ${iosLayout.screenMargin}px 120px`,
+          padding: `4px ${iosLayout.screenMargin}px 24px`,
           display: 'flex', flexDirection: 'column', gap: 10,
           WebkitOverflowScrolling: 'touch',
         }}

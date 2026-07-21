@@ -23,11 +23,11 @@ export default function Landing() {
   };
 
   return (
-    <div className="anim-fade" style={{ position: 'absolute', inset: 0, background: C.bgDeep, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    <div className="anim-fade navo-phase-screen" style={{ background: C.bgDeep, overflow: 'hidden' }}>
       <div className="navo-mesh-bg" aria-hidden />
       <BackgroundOrbs resolved={resolved} />
 
-      <div style={{ position: 'relative', padding: 'calc(env(safe-area-inset-top, 0px) + 20px) 26px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ position: 'relative', padding: 'calc(var(--navo-safe-top) + 20px) 26px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <NavoHeaderLockup />
         <div className="pressable pressable-sm ios-hit-44" onClick={enterApp}
           style={{ fontSize: 13, fontWeight: 600, color: C.landingSub, padding: '6px 10px', display: 'flex', alignItems: 'center' }}>
@@ -65,7 +65,7 @@ export default function Landing() {
         )}
       </div>
 
-      <div style={{ position: 'relative', padding: '12px 26px calc(env(safe-area-inset-bottom, 0px) + 28px)', flexShrink: 0 }}>
+      <div style={{ position: 'relative', padding: '12px 26px calc(var(--navo-safe-bottom) + 28px)', flexShrink: 0 }}>
         <div className="pressable" onClick={startOnboarding}
           style={{
             borderRadius: 9999,

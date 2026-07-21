@@ -72,7 +72,7 @@ export default function TicketSheet() {
         ...sheet,
         borderRadius: `${iosLayout.sheetRadius}px ${iosLayout.sheetRadius}px 0 0`,
         borderBottom: 'none',
-        padding: '10px 16px calc(env(safe-area-inset-bottom, 0px) + 20px)',
+        padding: '10px 16px calc(var(--navo-safe-bottom) + 20px)',
         display: 'flex', flexDirection: 'column', gap: 12, maxHeight: '94%',
       }}>
         <div style={{ width: 36, height: 5, borderRadius: 9999, background: C.sheetHandle, margin: '4px auto 6px', opacity: 0.85 }} />

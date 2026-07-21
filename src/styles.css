@@ -1,7 +1,12 @@
 * { box-sizing: border-box; }
-html, body, #root { height: 100%; }
-html {
-  color-scheme: dark light;
+
+:root {
+  --navo-vh: 100dvh;
+  --navo-safe-top: env(safe-area-inset-top, 0px);
+  --navo-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --navo-safe-left: env(safe-area-inset-left, 0px);
+  --navo-safe-right: env(safe-area-inset-right, 0px);
+  --navo-tab-bar-clearance: calc(58px + var(--navo-safe-bottom) + 16px);
   --navo-blue: #0A84FF;
   --navo-blue-deep: #0A4DB5;
   --navo-sky: #4DA3FF;
@@ -14,8 +19,12 @@ html {
   --navo-text-secondary: #8B93A7;
   --navo-text-tertiary: #6B7280;
 }
-body {
-  margin: 0;
+
+html {
+  height: 100%;
+  height: var(--navo-vh, 100dvh);
+  min-height: -webkit-fill-available;
+  color-scheme: dark light;
   font-family: -apple-system, 'SF Pro Display', 'Space Grotesk', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -25,14 +34,119 @@ body {
   transition: background-color 0.28s ease, color 0.28s ease;
   letter-spacing: -0.01em;
 }
+
+html, body, #root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body, #root {
+  height: 100%;
+  height: var(--navo-vh, 100dvh);
+  min-height: -webkit-fill-available;
+}
+
+html.navo-standalone,
+html.navo-standalone body,
+html.navo-standalone #root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+/* Full-screen native shell — edge-to-edge on installed iOS/Android PWAs */
+.navo-app-shell {
+  width: 100%;
+  height: 100%;
+  height: var(--navo-vh, 100dvh);
+  min-height: -webkit-fill-available;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.navo-app-frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+html.navo-standalone .navo-app-frame {
+  max-width: none;
+  margin: 0;
+}
+
+.navo-app-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.navo-phase-screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.navo-app-tabs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.navo-tab-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.navo-tab-bar-host {
+  flex-shrink: 0;
+  padding: 6px 16px calc(var(--navo-safe-bottom) + 8px);
+  z-index: 100;
+}
+
+.navo-tab-bar {
+  position: relative;
+  border-radius: 9999px;
+  overflow: hidden;
+  padding: 5px 6px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.navo-screen-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
 input, textarea {
   -webkit-user-select: text;
   user-select: text;
   font-family: inherit;
 }
 
-@media (display-mode: standalone) {
-  html, body, #root { height: 100%; height: 100dvh; }
+body {
+  margin: 0;
+  font-family: inherit;
 }
 
 a { text-decoration: none; }

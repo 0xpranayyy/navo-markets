@@ -173,7 +173,7 @@ export default function SignInSheet({ open, onClose, onSuccess, buildProfile }: 
         ...sheet,
         borderRadius: '28px 28px 0 0',
         borderBottom: 'none',
-        padding: `8px 22px calc(env(safe-area-inset-bottom, 0px) + 24px)`,
+        padding: `8px 22px calc(var(--navo-safe-bottom) + 24px)`,
         maxHeight: '92%',
         overflowY: 'auto',
       }}>

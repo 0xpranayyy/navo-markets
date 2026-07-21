@@ -133,7 +133,7 @@ export default function MarketDetail() {
       display: 'flex', flexDirection: 'column',
     }}>
       <div style={{
-        padding: 'calc(env(safe-area-inset-top, 0px) + 10px) 16px 8px',
+        padding: 'calc(var(--navo-safe-top) + 10px) 16px 8px',
         display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
       }}>
         <NavIconButton label="Back" onClick={() => dispatch({ type: 'CLOSE_MARKET' })}>
@@ -282,7 +282,7 @@ export default function MarketDetail() {
       {isBinary && (
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
-          padding: '12px 16px calc(env(safe-area-inset-bottom, 0px) + 16px)',
+          padding: '12px 16px calc(var(--navo-safe-bottom) + 16px)',
           display: 'flex', gap: 10,
           background: resolved === 'dark' ? 'rgba(8,9,11,0.72)' : 'rgba(242,242,247,0.78)',
           backdropFilter: 'blur(28px) saturate(180%)',
