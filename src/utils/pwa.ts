@@ -26,66 +26,63 @@ export function preferredOAuthProvider(): 'apple' | 'google' {
   return 'google';
 }
 
-function shellElements(): HTMLElement[] {
-  const nodes: HTMLElement[] = [
-    document.documentElement,
-    document.body,
-    document.getElementById('root')!,
-    ...document.querySelectorAll<HTMLElement>('.navo-root-fill'),
-  ].filter(Boolean);
-  return nodes;
-}
-
-function lockElementHeight(el: HTMLElement, px: string): void {
-  el.style.height = px;
-  el.style.minHeight = px;
-  el.style.maxHeight = px;
-}
-
-function unlockElementHeight(el: HTMLElement): void {
-  el.style.removeProperty('height');
-  el.style.removeProperty('min-height');
-  el.style.removeProperty('max-height');
-}
-
-/** Measure tab bar for InstallPrompt / scroll clearance. */
+/** Measure tab bar for scroll / InstallPrompt clearance. */
 export function measureTabBarClearance(): void {
   const host = document.querySelector<HTMLElement>('.navo-tab-bar-host');
   if (!host) return;
   const h = Math.ceil(host.getBoundingClientRect().height);
   if (h > 0) {
-    document.documentElement.style.setProperty('--navo-tab-bar-clearance', `${h + 8}px`);
+    document.documentElement.style.setProperty('--navo-tab-bar-clearance', `${h}px`);
   }
 }
 
-/** Apply pixel-perfect full-screen height for installed PWAs. */
+/**
+ * iOS home-screen PWAs: do NOT lock height to innerHeight — it excludes the
+ * home-indicator zone and causes the black bar below the tab bar. Use CSS inset:0
+ * + viewport-fit=cover instead; only shrink when the software keyboard opens.
+ */
 export function applyStandaloneViewport(): void {
   if (typeof document === 'undefined') return;
 
   const root = document.documentElement;
+  const appRoot = document.getElementById('root');
   const standalone = isStandalonePwa();
 
   root.classList.toggle('navo-standalone', standalone);
   root.classList.toggle('navo-ios', isIos());
 
-  if (!standalone) {
-    root.classList.remove('navo-keyboard-open');
+  const clearLocks = () => {
     root.style.removeProperty('--navo-app-h');
     root.style.removeProperty('--navo-vh');
-    shellElements().forEach(unlockElementHeight);
+    for (const el of [root, document.body, appRoot]) {
+      el?.style.removeProperty('height');
+      el?.style.removeProperty('min-height');
+      el?.style.removeProperty('max-height');
+    }
+  };
+
+  if (!standalone) {
+    root.classList.remove('navo-keyboard-open');
+    clearLocks();
     return;
   }
 
   const inner = window.innerHeight;
   const visual = window.visualViewport?.height ?? inner;
   const keyboardOpen = visual > 0 && visual < inner * 0.82;
-  const h = Math.round(keyboardOpen ? visual : inner);
-  const px = `${h}px`;
 
   root.classList.toggle('navo-keyboard-open', keyboardOpen);
-  root.style.setProperty('--navo-app-h', px);
-  root.style.setProperty('--navo-vh', px);
-  shellElements().forEach((el) => lockElementHeight(el, px));
+
+  if (keyboardOpen) {
+    const px = `${Math.round(visual)}px`;
+    root.style.setProperty('--navo-app-h', px);
+    if (appRoot) {
+      appRoot.style.height = px;
+      appRoot.style.maxHeight = px;
+    }
+  } else {
+    clearLocks();
+  }
 
   measureTabBarClearance();
 }
