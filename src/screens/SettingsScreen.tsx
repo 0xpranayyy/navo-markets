@@ -6,7 +6,6 @@ import { isPushEnabled, enablePushNotifications, disablePushNotifications } from
 import { isNativePlatform } from '../native/platform';
 import { isWatchlistAlertsEnabled, setWatchlistAlertsEnabled } from '../utils/watchlistAlerts';
 import { GroupedList, ListRow, NavIconButton, SegmentedControl, Toggle } from '../components/ios/controls';
-import { isStandalonePwa } from '../utils/pwa';
 
 const APPEARANCE: Array<{ id: ThemePreference; label: string }> = [
   { id: 'system', label: 'System' },
@@ -79,7 +78,7 @@ export default function SettingsScreen() {
     <div style={{ position: 'absolute', inset: 0, zIndex: 250 }}>
       <div className="anim-fade" onClick={close} style={{ position: 'absolute', inset: 0, background: C.overlay }} />
       <div className="anim-slideright" style={{
-        position: 'absolute', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: isStandalonePwa() ? undefined : 430,
+        position: 'absolute', top: 0, right: 0, bottom: 0, width: '100%',
         ...sheet,
         borderRight: 'none',
         display: 'flex', flexDirection: 'column',

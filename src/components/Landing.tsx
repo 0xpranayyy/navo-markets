@@ -44,13 +44,13 @@ export default function Landing() {
           <div className="navo-hero-gradient" style={{ fontSize: 38, fontWeight: 800, lineHeight: 1.06, letterSpacing: -0.6, marginBottom: 12 }}>
             Predict what happens next.
           </div>
-          <div style={{ fontSize: 16, color: C.landingSub, lineHeight: 1.5, marginBottom: 18, maxWidth: 340 }}>
+          <div style={{ fontSize: 16, color: C.landingSub, lineHeight: 1.5, marginBottom: 18, maxWidth: 520 }}>
             Real markets on elections, sports, crypto, and culture — priced by the crowd, traded in seconds.
           </div>
           <FeaturePills faint={C.landingSub} chipBg={C.inputBg} align="start" />
         </div>
 
-        <div style={{ width: '100%', maxWidth: 340, marginBottom: 16 }}>
+        <div style={{ width: '100%', maxWidth: 520, marginBottom: 16 }}>
           <LiveMarketTeaser />
         </div>
 

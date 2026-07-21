@@ -3,7 +3,6 @@ import { useApp } from '../store/AppContext';
 import { useAuth } from '../auth/AuthProvider';
 import { useTheme, formatCash } from '../theme';
 import { copyText } from '../utils/clipboard';
-import { isStandalonePwa } from '../utils/pwa';
 
 /**
  * Cash-out flow: Safe → EOA (if needed), then open a fiat offramp
@@ -53,7 +52,7 @@ export default function CashOutSheet({ onClose }: { onClose: () => void }) {
     <div style={{ position: 'absolute', inset: 0, zIndex: 280 }}>
       <div className="anim-fade" onClick={onClose} style={{ position: 'absolute', inset: 0, background: C.overlay }} />
       <div className="anim-sheetup" style={{
-        position: 'absolute', left: 0, right: 0, bottom: 0, maxWidth: isStandalonePwa() ? undefined : 430, margin: '0 auto',
+        position: 'absolute', left: 0, right: 0, bottom: 0,
         ...sheet,
         borderRadius: '24px 24px 0 0',
         borderBottom: 'none',
