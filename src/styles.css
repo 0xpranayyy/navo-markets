@@ -137,8 +137,38 @@ html.navo-standalone .navo-app-tabs {
   overflow: hidden;
 }
 
-/* Desktop browser only: centered phone frame */
-@media (min-width: 431px) {
+/*
+ * Real phones (Safari + PWA): always edge-to-edge.
+ * The old min-width:431px "phone frame" was shrinking iPhone Pro Max / Simulator.
+ */
+@media (max-width: 767px), (pointer: coarse) {
+  html,
+  body,
+  #root {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .navo-root-fill,
+  .navo-app-shell,
+  .navo-app-frame,
+  .navo-app-stage,
+  .navo-app-tabs,
+  .navo-phase-screen {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100%;
+    min-height: 0;
+    margin: 0 !important;
+  }
+}
+
+/* Desktop only: centered phone preview */
+@media (min-width: 768px) and (pointer: fine) and (hover: hover) {
   html:not(.navo-standalone) .navo-app-shell:not(.navo-app-shell--native) {
     align-items: center;
   }

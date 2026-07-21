@@ -65,7 +65,7 @@ export default function Landing() {
         )}
       </div>
 
-      <div style={{ position: 'relative', padding: '12px 26px calc(var(--navo-safe-bottom) + 28px)', flexShrink: 0 }}>
+      <div style={{ position: 'relative', padding: '12px 26px calc(var(--navo-safe-bottom) + 16px)', flexShrink: 0 }}>
         <div className="pressable" onClick={startOnboarding}
           style={{
             borderRadius: 9999,
