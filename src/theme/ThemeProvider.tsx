@@ -34,6 +34,7 @@ function savePreference(preference: ThemePreference) {
 function applyDocumentTheme(resolved: ResolvedTheme, colors: ThemeColors) {
   document.documentElement.setAttribute('data-theme', resolved);
   document.documentElement.style.colorScheme = resolved;
+  document.documentElement.style.background = colors.groupedBackground;
   document.body.style.background = colors.groupedBackground;
   document.body.style.color = colors.text;
 

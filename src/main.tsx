@@ -12,16 +12,18 @@ import PwaViewportFix from './components/PwaViewportFix';
 initPwaLayout();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <ThemeProvider>
-        <AuthProvider>
-          <AppProvider>
-            <PwaViewportFix />
-            <App />
-          </AppProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  </React.StrictMode>,
+  <div className="navo-root-fill">
+    <React.StrictMode>
+      <ErrorBoundary>
+        <ThemeProvider>
+          <AuthProvider>
+            <AppProvider>
+              <PwaViewportFix />
+              <App />
+            </AppProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </React.StrictMode>
+  </div>,
 );

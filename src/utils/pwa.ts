@@ -26,12 +26,43 @@ export function preferredOAuthProvider(): 'apple' | 'google' {
   return 'google';
 }
 
-/** Keep installed PWAs edge-to-edge; shrink only when the software keyboard opens. */
+function shellElements(): HTMLElement[] {
+  const nodes: HTMLElement[] = [
+    document.documentElement,
+    document.body,
+    document.getElementById('root')!,
+    ...document.querySelectorAll<HTMLElement>('.navo-root-fill'),
+  ].filter(Boolean);
+  return nodes;
+}
+
+function lockElementHeight(el: HTMLElement, px: string): void {
+  el.style.height = px;
+  el.style.minHeight = px;
+  el.style.maxHeight = px;
+}
+
+function unlockElementHeight(el: HTMLElement): void {
+  el.style.removeProperty('height');
+  el.style.removeProperty('min-height');
+  el.style.removeProperty('max-height');
+}
+
+/** Measure tab bar for InstallPrompt / scroll clearance. */
+export function measureTabBarClearance(): void {
+  const host = document.querySelector<HTMLElement>('.navo-tab-bar-host');
+  if (!host) return;
+  const h = Math.ceil(host.getBoundingClientRect().height);
+  if (h > 0) {
+    document.documentElement.style.setProperty('--navo-tab-bar-clearance', `${h + 8}px`);
+  }
+}
+
+/** Apply pixel-perfect full-screen height for installed PWAs. */
 export function applyStandaloneViewport(): void {
   if (typeof document === 'undefined') return;
 
   const root = document.documentElement;
-  const appRoot = document.getElementById('root');
   const standalone = isStandalonePwa();
 
   root.classList.toggle('navo-standalone', standalone);
@@ -40,32 +71,23 @@ export function applyStandaloneViewport(): void {
   if (!standalone) {
     root.classList.remove('navo-keyboard-open');
     root.style.removeProperty('--navo-app-h');
-    appRoot?.style.removeProperty('height');
-    appRoot?.style.removeProperty('bottom');
+    root.style.removeProperty('--navo-vh');
+    shellElements().forEach(unlockElementHeight);
     return;
   }
 
   const inner = window.innerHeight;
   const visual = window.visualViewport?.height ?? inner;
   const keyboardOpen = visual > 0 && visual < inner * 0.82;
+  const h = Math.round(keyboardOpen ? visual : inner);
+  const px = `${h}px`;
 
   root.classList.toggle('navo-keyboard-open', keyboardOpen);
+  root.style.setProperty('--navo-app-h', px);
+  root.style.setProperty('--navo-vh', px);
+  shellElements().forEach((el) => lockElementHeight(el, px));
 
-  if (keyboardOpen) {
-    const h = Math.round(visual);
-    root.style.setProperty('--navo-app-h', `${h}px`);
-    if (appRoot) {
-      appRoot.style.height = `${h}px`;
-      appRoot.style.bottom = 'auto';
-    }
-    return;
-  }
-
-  root.style.setProperty('--navo-app-h', `${Math.round(inner)}px`);
-  if (appRoot) {
-    appRoot.style.removeProperty('height');
-    appRoot.style.removeProperty('bottom');
-  }
+  measureTabBarClearance();
 }
 
 /** Lock viewport and mark standalone mode for native iOS shell layout. */
@@ -76,9 +98,12 @@ export function initPwaLayout(): void {
 
   const onResize = () => applyStandaloneViewport();
   window.addEventListener('resize', onResize);
-  window.addEventListener('orientationchange', () => window.setTimeout(onResize, 150));
+  window.addEventListener('orientationchange', () => {
+    window.setTimeout(onResize, 50);
+    window.setTimeout(onResize, 200);
+    window.setTimeout(onResize, 500);
+  });
   window.visualViewport?.addEventListener('resize', onResize);
-  window.visualViewport?.addEventListener('scroll', onResize);
   window.matchMedia('(display-mode: standalone)').addEventListener('change', onResize);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
@@ -86,4 +111,31 @@ export function initPwaLayout(): void {
       window.setTimeout(onResize, 300);
     }
   });
+}
+
+let tabBarObserver: ResizeObserver | null = null;
+
+/** Observe tab bar size after React mounts. */
+export function observeTabBarClearance(): () => void {
+  if (typeof window === 'undefined' || !('ResizeObserver' in window)) {
+    return () => {};
+  }
+
+  tabBarObserver?.disconnect();
+  tabBarObserver = new ResizeObserver(() => measureTabBarClearance());
+
+  const attach = () => {
+    const host = document.querySelector('.navo-tab-bar-host');
+    if (host) tabBarObserver?.observe(host);
+    measureTabBarClearance();
+  };
+
+  attach();
+  const t = window.setTimeout(attach, 100);
+
+  return () => {
+    window.clearTimeout(t);
+    tabBarObserver?.disconnect();
+    tabBarObserver = null;
+  };
 }

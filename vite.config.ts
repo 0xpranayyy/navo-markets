@@ -47,7 +47,17 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webmanifest}'],
           navigateFallback: '/index.html',
+          cleanupOutdatedCaches: true,
           runtimeCaching: [
+            {
+              urlPattern: ({ request }) => request.mode === 'navigate',
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'navo-navigate',
+                networkTimeoutSeconds: 4,
+                expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 },
+              },
+            },
             {
               urlPattern: /^https:\/\/gamma-api\.polymarket\.com\/.*/i,
               handler: 'NetworkFirst',

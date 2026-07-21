@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isStandalonePwa } from '../utils/pwa';
 import { useTheme } from '../theme';
 import { NavoMark } from './brand/NavoMark';
 import { isBiometricEnabled, authenticateBiometric } from '../native/biometric';
@@ -23,8 +24,10 @@ export default function BiometricGate({ children }: { children: React.ReactNode 
 
   if (!locked) return <>{children}</>;
 
+  const standalone = isStandalonePwa();
+
   return (
-    <div className="navo-app-shell" style={{ background: C.bgDeep }}>
+    <div className={`navo-app-shell${standalone ? ' navo-app-shell--native' : ''}`} style={{ background: C.bgDeep }}>
       <div className="navo-app-frame" style={{
         background: C.bg,
         display: 'flex',
