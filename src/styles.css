@@ -47,14 +47,39 @@ body, #root {
   min-height: -webkit-fill-available;
 }
 
+/* Installed PWA — fill the physical screen; do NOT set a pixel height (causes letterboxing). */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  html, body, #root {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+  }
+}
+
 html.navo-standalone,
 html.navo-standalone body,
 html.navo-standalone #root {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: manipulation;
+}
+
+html.navo-standalone.navo-keyboard-open,
+html.navo-standalone.navo-keyboard-open body,
+html.navo-standalone.navo-keyboard-open #root {
+  height: var(--navo-vh, 100dvh);
 }
 
 /* Full-screen native shell — edge-to-edge on installed iOS/Android PWAs */
@@ -67,6 +92,30 @@ html.navo-standalone #root {
   flex-direction: column;
   overflow: hidden;
   overscroll-behavior: none;
+}
+
+html.navo-standalone .navo-app-shell {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+}
+
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .navo-app-shell {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+  }
+}
+
+html.navo-standalone.navo-keyboard-open .navo-app-shell {
+  top: 0;
+  bottom: auto;
+  height: var(--navo-vh, 100dvh);
 }
 
 .navo-app-frame {
@@ -84,6 +133,29 @@ html.navo-standalone #root {
 html.navo-standalone .navo-app-frame {
   max-width: none;
   margin: 0;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .navo-app-frame {
+    max-width: none;
+    margin: 0;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+  }
+
+  html, body, #root {
+    background: #000000;
+  }
+
+  [data-theme="light"] html,
+  [data-theme="light"] body,
+  [data-theme="light"] #root {
+    background: #F4F5F7;
+  }
 }
 
 .navo-app-stage {
@@ -121,8 +193,18 @@ html.navo-standalone .navo-app-frame {
 
 .navo-tab-bar-host {
   flex-shrink: 0;
-  padding: 6px 16px calc(var(--navo-safe-bottom) + 8px);
+  padding: 4px 16px max(8px, env(safe-area-inset-bottom, 0px));
   z-index: 100;
+}
+
+html.navo-standalone .navo-tab-bar-host {
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+}
+
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .navo-tab-bar-host {
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .navo-tab-bar {

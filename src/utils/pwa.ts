@@ -15,22 +15,44 @@ export function initPwaLayout(): void {
   const root = document.documentElement;
 
   const syncStandalone = () => {
-    root.classList.toggle('navo-standalone', isStandalonePwa());
+    const standalone = isStandalonePwa();
+    root.classList.toggle('navo-standalone', standalone);
+    root.classList.toggle('navo-ios', isIos());
   };
 
+  /** Only shrink viewport when the software keyboard is open — never letterbox standalone PWAs. */
   const syncViewportHeight = () => {
-    const h = window.visualViewport?.height ?? window.innerHeight;
-    root.style.setProperty('--navo-vh', `${Math.round(h)}px`);
+    if (!isStandalonePwa()) {
+      root.classList.remove('navo-keyboard-open');
+      root.style.removeProperty('--navo-vh');
+      return;
+    }
+
+    const inner = window.innerHeight;
+    const visual = window.visualViewport?.height ?? inner;
+    const keyboardOpen = visual > 0 && visual < inner * 0.82;
+
+    if (keyboardOpen) {
+      root.classList.add('navo-keyboard-open');
+      root.style.setProperty('--navo-vh', `${Math.round(visual)}px`);
+    } else {
+      root.classList.remove('navo-keyboard-open');
+      root.style.removeProperty('--navo-vh');
+    }
   };
 
   syncStandalone();
   syncViewportHeight();
 
   window.addEventListener('resize', syncViewportHeight);
-  window.addEventListener('orientationchange', syncViewportHeight);
+  window.addEventListener('orientationchange', () => {
+    window.setTimeout(syncViewportHeight, 100);
+  });
   window.visualViewport?.addEventListener('resize', syncViewportHeight);
-  window.visualViewport?.addEventListener('scroll', syncViewportHeight);
-  window.matchMedia('(display-mode: standalone)').addEventListener('change', syncStandalone);
+  window.matchMedia('(display-mode: standalone)').addEventListener('change', () => {
+    syncStandalone();
+    syncViewportHeight();
+  });
 }
 
 export function isIos(): boolean {

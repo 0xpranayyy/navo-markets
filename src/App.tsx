@@ -47,7 +47,7 @@ export default function App() {
 
   return (
     <BiometricGate>
-      <div className="navo-app-shell" style={{ background: C.bgDeep }}>
+      <div className="navo-app-shell" style={{ background: C.bg }}>
         <div className="navo-app-frame" style={{ background: C.bg }}>
           <AmbientField />
           <div className="navo-app-stage">
