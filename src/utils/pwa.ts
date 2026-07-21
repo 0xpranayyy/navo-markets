@@ -37,9 +37,9 @@ export function measureTabBarClearance(): void {
 }
 
 /**
- * iOS home-screen PWAs: do NOT lock height to innerHeight — it excludes the
- * home-indicator zone and causes the black bar below the tab bar. Use CSS inset:0
- * + viewport-fit=cover instead; only shrink when the software keyboard opens.
+ * Full-bleed installed PWA shell.
+ * On iOS, NEVER size the shell to window.innerHeight alone — that leaves the
+ * home-indicator letterbox. Prefer CSS inset:0; only shrink for keyboard.
  */
 export function applyStandaloneViewport(): void {
   if (typeof document === 'undefined') return;
@@ -53,11 +53,12 @@ export function applyStandaloneViewport(): void {
 
   const clearLocks = () => {
     root.style.removeProperty('--navo-app-h');
-    root.style.removeProperty('--navo-vh');
-    for (const el of [root, document.body, appRoot]) {
+    for (const el of [appRoot]) {
       el?.style.removeProperty('height');
       el?.style.removeProperty('min-height');
       el?.style.removeProperty('max-height');
+      el?.style.removeProperty('top');
+      el?.style.removeProperty('bottom');
     }
   };
 
@@ -69,17 +70,18 @@ export function applyStandaloneViewport(): void {
 
   const inner = window.innerHeight;
   const visual = window.visualViewport?.height ?? inner;
+  const offsetTop = window.visualViewport?.offsetTop ?? 0;
   const keyboardOpen = visual > 0 && visual < inner * 0.82;
 
   root.classList.toggle('navo-keyboard-open', keyboardOpen);
 
-  if (keyboardOpen) {
+  if (keyboardOpen && appRoot) {
     const px = `${Math.round(visual)}px`;
     root.style.setProperty('--navo-app-h', px);
-    if (appRoot) {
-      appRoot.style.height = px;
-      appRoot.style.maxHeight = px;
-    }
+    appRoot.style.top = `${Math.round(offsetTop)}px`;
+    appRoot.style.bottom = 'auto';
+    appRoot.style.height = px;
+    appRoot.style.maxHeight = px;
   } else {
     clearLocks();
   }
@@ -87,7 +89,7 @@ export function applyStandaloneViewport(): void {
   measureTabBarClearance();
 }
 
-/** Lock viewport and mark standalone mode for native iOS shell layout. */
+/** Mark standalone mode and keep keyboard height in sync. */
 export function initPwaLayout(): void {
   if (typeof document === 'undefined') return;
 
@@ -97,16 +99,12 @@ export function initPwaLayout(): void {
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', () => {
     window.setTimeout(onResize, 50);
-    window.setTimeout(onResize, 200);
-    window.setTimeout(onResize, 500);
+    window.setTimeout(onResize, 250);
   });
   window.visualViewport?.addEventListener('resize', onResize);
   window.matchMedia('(display-mode: standalone)').addEventListener('change', onResize);
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      window.setTimeout(onResize, 50);
-      window.setTimeout(onResize, 300);
-    }
+    if (document.visibilityState === 'visible') window.setTimeout(onResize, 50);
   });
 }
 

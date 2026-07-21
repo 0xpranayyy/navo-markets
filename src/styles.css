@@ -1,12 +1,11 @@
 * { box-sizing: border-box; }
 
 :root {
-  --navo-vh: 100dvh;
   --navo-safe-top: env(safe-area-inset-top, 0px);
   --navo-safe-bottom: env(safe-area-inset-bottom, 0px);
   --navo-safe-left: env(safe-area-inset-left, 0px);
   --navo-safe-right: env(safe-area-inset-right, 0px);
-  --navo-tab-bar-clearance: calc(58px + var(--navo-safe-bottom) + 16px);
+  --navo-tab-bar-clearance: calc(72px + env(safe-area-inset-bottom, 0px));
   --navo-blue: #0A84FF;
   --navo-blue-deep: #0A4DB5;
   --navo-sky: #4DA3FF;
@@ -21,8 +20,10 @@
 }
 
 html {
+  width: 100%;
   height: 100%;
-  height: var(--navo-vh, 100dvh);
+  margin: 0;
+  padding: 0;
   color-scheme: dark light;
   font-family: -apple-system, 'SF Pro Display', 'Space Grotesk', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -32,6 +33,11 @@ html {
   user-select: none;
   transition: background-color 0.28s ease, color 0.28s ease;
   letter-spacing: -0.01em;
+  background: #000000;
+}
+
+[data-theme="light"] html {
+  background: #F4F5F7;
 }
 
 html, body, #root {
@@ -40,72 +46,80 @@ html, body, #root {
   padding: 0;
 }
 
-body, #root {
+body {
   height: 100%;
-  height: var(--navo-vh, 100dvh);
+  min-height: 100%;
+  min-height: -webkit-fill-available;
+  background: inherit;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  min-height: 100%;
+  min-height: -webkit-fill-available;
 }
 
 /* Full-height wrapper so React provider tree fills #root */
 .navo-root-fill {
   width: 100%;
   height: 100%;
-  min-height: 0;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-/* ── Installed PWA: inset shell fills physical screen incl. home indicator ── */
-html.navo-standalone {
-  --navo-vh: 100%;
-  background: #000000;
+/*
+ * Installed PWA: pin the shell to the physical screen with inset:0.
+ * Do not use 100dvh / innerHeight — those leave the iOS home-indicator gap.
+ */
+html.navo-standalone,
+html.navo-standalone body {
+  width: 100%;
   height: 100%;
-  min-height: -webkit-fill-available;
   overflow: hidden;
   overscroll-behavior: none;
+  background: #000000;
+  position: fixed;
+  inset: 0;
 }
 
-[data-theme="light"] html.navo-standalone {
+[data-theme="light"] html.navo-standalone,
+[data-theme="light"] html.navo-standalone body {
   background: #F4F5F7;
 }
 
-html.navo-standalone body {
-  height: 100%;
-  min-height: -webkit-fill-available;
-  overflow: hidden;
-  overscroll-behavior: none;
-  background: inherit;
-}
-
-/* inset:0 reaches the physical bottom; innerHeight px leaves a black home-indicator gap */
 html.navo-standalone #root {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
-  min-height: -webkit-fill-available;
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: manipulation;
 }
 
 html.navo-standalone.navo-keyboard-open #root {
-  inset: auto 0 0 0;
   height: var(--navo-app-h, 100%);
   max-height: var(--navo-app-h, 100%);
 }
 
 html.navo-standalone .navo-root-fill,
-html.navo-standalone .navo-app-shell {
+html.navo-standalone .navo-app-shell,
+html.navo-standalone .navo-app-frame,
+html.navo-standalone .navo-app-stage,
+html.navo-standalone .navo-app-tabs {
+  width: 100%;
   height: 100%;
-  min-height: 0;
+  max-width: none;
   flex: 1;
+  min-height: 0;
 }
 
 .navo-app-shell {
   width: 100%;
   height: 100%;
-  height: var(--navo-vh, 100dvh);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -123,9 +137,9 @@ html.navo-standalone .navo-app-shell {
   overflow: hidden;
 }
 
-/* Desktop browser: centered phone frame */
+/* Desktop browser only: centered phone frame */
 @media (min-width: 431px) {
-  .navo-app-shell:not(.navo-app-shell--native) {
+  html:not(.navo-standalone) .navo-app-shell:not(.navo-app-shell--native) {
     align-items: center;
   }
 
@@ -133,13 +147,6 @@ html.navo-standalone .navo-app-shell {
     max-width: 430px;
     margin: 0 auto;
   }
-}
-
-html.navo-standalone .navo-app-frame {
-  max-width: none;
-  margin: 0;
-  flex: 1;
-  height: 100%;
 }
 
 .navo-app-stage {
@@ -184,21 +191,20 @@ html.navo-standalone .navo-app-frame {
   background: transparent;
 }
 
-/* Pin to physical bottom; safe-area padding keeps pill above home indicator */
+/* Always pin tab bar to the physical bottom in installed mode (like native apps) */
 html.navo-standalone .navo-tab-bar-host {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  margin-top: 0;
-  padding: 6px 16px env(safe-area-inset-bottom, 0px);
+  margin: 0;
+  padding: 8px 16px calc(env(safe-area-inset-bottom, 0px) + 4px);
   z-index: 100;
+  background: transparent;
 }
 
 html.navo-standalone .navo-tab-content {
-  flex: 1;
-  min-height: 0;
-  padding-bottom: var(--navo-tab-bar-clearance, calc(72px + env(safe-area-inset-bottom, 0px)));
+  padding-bottom: var(--navo-tab-bar-clearance);
 }
 
 .navo-tab-bar {
