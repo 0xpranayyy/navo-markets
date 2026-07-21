@@ -5,14 +5,14 @@
   --navo-safe-bottom: env(safe-area-inset-bottom, 0px);
   --navo-safe-left: env(safe-area-inset-left, 0px);
   --navo-safe-right: env(safe-area-inset-right, 0px);
-  --navo-tab-bar-clearance: calc(72px + env(safe-area-inset-bottom, 0px));
+  --navo-tab-bar-clearance: calc(49px + env(safe-area-inset-bottom, 0px) + 8px);
   --navo-blue: #0A84FF;
   --navo-blue-deep: #0A4DB5;
   --navo-sky: #4DA3FF;
   --navo-bg: #000000;
-  --navo-surface: #1C1E22;
-  --navo-hairline: #26282C;
-  --navo-paper: #F4F5F7;
+  --navo-surface: #1C1C1E;
+  --navo-hairline: rgba(84, 84, 88, 0.65);
+  --navo-paper: #F2F2F7;
   --navo-yes: #34C759;
   --navo-no: #FF453A;
   --navo-text-secondary: #8B93A7;
@@ -32,7 +32,7 @@ html {
 }
 
 [data-theme="light"] html {
-  background: #F4F5F7;
+  background: #F2F2F7;
 }
 
 /* Full-bleed viewport for Safari, PWA, and desktop — no 430px phone cage */
@@ -79,7 +79,7 @@ html.navo-standalone body {
 
 [data-theme="light"] html.navo-standalone,
 [data-theme="light"] html.navo-standalone body {
-  background: #F4F5F7;
+  background: #F2F2F7;
 }
 
 html.navo-standalone.navo-keyboard-open #root {
@@ -144,35 +144,49 @@ html.navo-standalone.navo-keyboard-open #root {
 .navo-tab-bar-host {
   flex-shrink: 0;
   margin-top: auto;
-  padding: 6px 16px 0;
-  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
   z-index: 100;
   background: transparent;
 }
 
-/* Always pin tab bar to the physical bottom in installed mode (like native apps) */
+/* HIG tab bar: full-bleed translucent chrome + home-indicator padding */
+.navo-tab-bar {
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  min-height: 49px;
+  padding: 4px 0 calc(env(safe-area-inset-bottom, 0px));
+}
+
+.navo-tab-item {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 2px 4px 4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
 html.navo-standalone .navo-tab-bar-host {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   margin: 0;
-  padding: 8px 16px calc(env(safe-area-inset-bottom, 0px) + 4px);
   z-index: 100;
-  background: transparent;
 }
 
 html.navo-standalone .navo-tab-content {
   padding-bottom: var(--navo-tab-bar-clearance);
-}
-
-.navo-tab-bar {
-  position: relative;
-  border-radius: 9999px;
-  overflow: hidden;
-  padding: 5px 6px;
-  display: flex;
-  justify-content: space-around;
 }
 
 .navo-screen-scroll {
@@ -224,6 +238,7 @@ a { text-decoration: none; }
 }
 .liquid-card:active {
   transform: scale(0.985);
+  opacity: 0.92;
 }
 
 @keyframes om-fade { from { opacity: 0; } to { opacity: 1; } }

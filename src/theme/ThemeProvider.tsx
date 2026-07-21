@@ -41,7 +41,7 @@ function applyDocumentTheme(resolved: ResolvedTheme, colors: ThemeColors) {
   document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
     const media = meta.getAttribute('media') ?? '';
     if (media.includes('dark')) meta.setAttribute('content', '#000000');
-    else if (media.includes('light')) meta.setAttribute('content', '#F4F5F7');
+    else if (media.includes('light')) meta.setAttribute('content', '#F2F2F7');
     else meta.setAttribute('content', colors.metaThemeColor);
   });
 }

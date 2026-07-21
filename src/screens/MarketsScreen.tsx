@@ -30,7 +30,7 @@ export default function MarketsScreen() {
       <div style={{
         position: 'sticky', top: 0, zIndex: 20, flexShrink: 0,
         background: scrolled
-          ? (resolved === 'dark' ? 'rgba(0,0,0,0.72)' : 'rgba(244,245,247,0.78)')
+          ? (resolved === 'dark' ? 'rgba(0,0,0,0.72)' : 'rgba(242,242,247,0.78)')
           : 'transparent',
         backdropFilter: scrolled ? 'blur(28px) saturate(180%)' : undefined,
         WebkitBackdropFilter: scrolled ? 'blur(28px) saturate(180%)' : undefined,
@@ -40,17 +40,16 @@ export default function MarketsScreen() {
         <LargeTitle compact={scrolled}
           trailing={
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6,
-              ...{ fontSize: 11, fontWeight: 600, letterSpacing: 0.4 },
+              display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4,
+              fontSize: 12, fontWeight: 600, letterSpacing: -0.08,
               color: live ? C.green : C.faint,
             }}>
               <span className={live ? 'anim-live-dot' : undefined} style={{
                 width: 6, height: 6, borderRadius: 9999,
                 background: live ? C.green : C.faint,
-                boxShadow: live ? `0 0 8px ${C.green}` : 'none',
                 display: 'inline-block',
               }} />
-              {live ? 'LIVE' : 'SYNCING'}
+              {live ? 'Live' : 'Syncing'}
             </div>
           }
         >
@@ -65,7 +64,7 @@ export default function MarketsScreen() {
 
         <div className="no-scrollbar" style={{
           display: 'flex', gap: 8, overflowX: 'auto',
-          padding: `0 ${iosLayout.screenMargin}px 12px`, WebkitOverflowScrolling: 'touch',
+          padding: `0 ${iosLayout.screenMargin}px 10px`, WebkitOverflowScrolling: 'touch',
         }}>
           {CATEGORIES.map((c) => {
             const activeCat = c === state.activeCategory;
@@ -75,12 +74,14 @@ export default function MarketsScreen() {
                 className="pressable pressable-sm"
                 onClick={() => { hapticLight(); dispatch({ type: 'SET_CATEGORY', category: c }); }}
                 style={{
-                  padding: '7px 13px', borderRadius: 9999,
+                  padding: '7px 14px', borderRadius: 9999,
                   background: activeCat ? C.categoryChipActiveBg : C.categoryChipBg,
                   color: activeCat ? C.categoryChipActiveText : C.categoryChipText,
-                  fontSize: 15, fontWeight: activeCat ? 650 : 500,
+                  fontSize: 15, fontWeight: activeCat ? 600 : 400,
                   whiteSpace: 'nowrap', flexShrink: 0,
-                  letterSpacing: -0.2,
+                  letterSpacing: -0.24,
+                  minHeight: 32,
+                  display: 'flex', alignItems: 'center',
                 }}
               >
                 {c}
@@ -97,8 +98,8 @@ export default function MarketsScreen() {
         onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 8)}
         style={{
           flex: 1, overflowY: 'auto',
-          padding: `4px ${iosLayout.screenMargin}px 24px`,
-          display: 'flex', flexDirection: 'column', gap: 10,
+          padding: `4px ${iosLayout.screenMargin}px 20px`,
+          display: 'flex', flexDirection: 'column', gap: 12,
           WebkitOverflowScrolling: 'touch',
         }}
       >

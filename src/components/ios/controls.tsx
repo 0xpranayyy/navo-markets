@@ -3,17 +3,21 @@ import { useTheme } from '../../theme';
 import { groupedListStyle, iosLayout, iosType } from '../../theme/typography';
 import { hapticLight } from '../../utils/haptics';
 
-/** iOS large title (34pt bold). */
+/** iOS large title (34pt Bold) — collapses on scroll. */
 export function LargeTitle({ children, trailing, compact }: { children: ReactNode; trailing?: ReactNode; compact?: boolean }) {
   const { colors: C } = useTheme();
   return (
     <div style={{
       padding: compact
-        ? 'max(var(--navo-safe-top), 8px) 20px 4px'
-        : 'max(var(--navo-safe-top), 12px) 20px 6px',
+        ? `max(var(--navo-safe-top), 6px) ${iosLayout.screenMargin}px 2px`
+        : `max(var(--navo-safe-top), 8px) ${iosLayout.screenMargin}px 4px`,
       display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12,
     }}>
-      <div style={{ ...iosType.largeTitle, color: C.text, ...(compact ? { fontSize: 28, letterSpacing: -0.5 } : {}) }}>
+      <div style={{
+        ...(compact ? iosType.title1 : iosType.largeTitle),
+        color: C.text,
+        transition: 'font-size 0.18s cubic-bezier(0.32, 0.72, 0, 1)',
+      }}>
         {children}
       </div>
       {trailing}
@@ -95,10 +99,10 @@ export function SearchField({
       className={onClick ? 'pressable' : undefined}
       onClick={onClick}
       style={{
-        margin: '4px 20px 10px', height: iosLayout.searchHeight, borderRadius: 10,
+        margin: `4px ${iosLayout.screenMargin}px 10px`, height: iosLayout.searchHeight, borderRadius: 10,
         background: C.inputBg,
         display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px 0 12px',
-        border: `0.5px solid ${C.hair}`,
+        border: 'none',
         flexShrink: 0,
       }}
     >
@@ -282,7 +286,6 @@ export function PrimaryButton({
         padding: '14px 18px',
         textAlign: 'center',
         opacity: disabled ? 0.55 : 1,
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)',
         minHeight: iosLayout.minTouch,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}

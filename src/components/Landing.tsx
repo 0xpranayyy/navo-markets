@@ -27,24 +27,24 @@ export default function Landing() {
       <div className="navo-mesh-bg" aria-hidden />
       <BackgroundOrbs resolved={resolved} />
 
-      <div style={{ position: 'relative', padding: 'calc(var(--navo-safe-top) + 20px) 26px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ position: 'relative', padding: 'max(var(--navo-safe-top), 8px) 16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <NavoHeaderLockup />
         <div className="pressable pressable-sm ios-hit-44" onClick={enterApp}
-          style={{ fontSize: 13, fontWeight: 600, color: C.landingSub, padding: '6px 10px', display: 'flex', alignItems: 'center' }}>
+          style={{ fontSize: 17, fontWeight: 400, color: C.blue, padding: '6px 4px', display: 'flex', alignItems: 'center', letterSpacing: -0.41 }}>
           Skip
         </div>
       </div>
 
-      <div className="no-scrollbar" style={{ position: 'relative', flex: 1, overflowY: 'auto', padding: '20px 26px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ marginBottom: 22, alignSelf: 'flex-start' }}>
+      <div className="no-scrollbar" style={{ position: 'relative', flex: 1, overflowY: 'auto', padding: '16px 16px 0', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+        <div style={{ marginBottom: 20, alignSelf: 'flex-start' }}>
           <NavoProductLockup size={56} />
         </div>
 
         <div style={{ alignSelf: 'stretch', marginBottom: 24 }}>
-          <div className="navo-hero-gradient" style={{ fontSize: 38, fontWeight: 800, lineHeight: 1.06, letterSpacing: -0.6, marginBottom: 12 }}>
+          <div className="navo-hero-gradient" style={{ fontSize: 34, fontWeight: 700, lineHeight: 1.12, letterSpacing: 0.37, marginBottom: 10 }}>
             Predict what happens next.
           </div>
-          <div style={{ fontSize: 16, color: C.landingSub, lineHeight: 1.5, marginBottom: 18, maxWidth: 520 }}>
+          <div style={{ fontSize: 17, color: C.landingSub, lineHeight: 1.35, marginBottom: 16, letterSpacing: -0.41, maxWidth: 520 }}>
             Real markets on elections, sports, crypto, and culture — priced by the crowd, traded in seconds.
           </div>
           <FeaturePills faint={C.landingSub} chipBg={C.inputBg} align="start" />
@@ -65,37 +65,42 @@ export default function Landing() {
         )}
       </div>
 
-      <div style={{ position: 'relative', padding: '12px 26px calc(var(--navo-safe-bottom) + 16px)', flexShrink: 0 }}>
+      <div style={{ position: 'relative', padding: '12px 16px calc(var(--navo-safe-bottom) + 16px)', flexShrink: 0 }}>
         <div className="pressable" onClick={startOnboarding}
           style={{
-            borderRadius: 9999,
-            padding: 17,
+            borderRadius: 14,
+            padding: 16,
             textAlign: 'center',
             background: C.blue,
             color: '#fff',
             fontSize: 17,
-            fontWeight: 700,
+            fontWeight: 600,
+            letterSpacing: -0.41,
             marginBottom: 10,
-            boxShadow: '0 8px 28px rgba(10,132,255,0.35)',
+            minHeight: 50,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}>
           Get started
         </div>
 
         <div className="pressable" onClick={() => { hapticLight(); openSignIn(enterApp); }}
           style={{
-            borderRadius: 9999,
+            borderRadius: 14,
             padding: 16,
             textAlign: 'center',
             fontSize: 17,
             fontWeight: 600,
-            color: C.text,
-            marginBottom: 10,
-            background: C.groupedSurface ?? C.inputBg,
-            border: `0.5px solid ${C.hair}`,
+            letterSpacing: -0.41,
+            color: C.blue,
+            marginBottom: 8,
+            background: C.inputBg,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
+            minHeight: 50,
           }}>
           {(isIos() || isStandalonePwa()) && (
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
@@ -106,7 +111,7 @@ export default function Landing() {
         </div>
 
         <div className="pressable" onClick={enterApp}
-          style={{ textAlign: 'center', fontSize: 13, fontWeight: 600, color: C.faint, padding: 8, marginBottom: 14 }}>
+          style={{ textAlign: 'center', fontSize: 15, fontWeight: 400, color: C.blue, padding: 10, marginBottom: 12, letterSpacing: -0.24 }}>
           Browse markets without an account
         </div>
 
