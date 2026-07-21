@@ -57,6 +57,9 @@ export function applyStandaloneViewport(): void {
       el?.style.removeProperty('height');
       el?.style.removeProperty('min-height');
       el?.style.removeProperty('max-height');
+      el?.style.removeProperty('position');
+      el?.style.removeProperty('left');
+      el?.style.removeProperty('right');
       el?.style.removeProperty('top');
       el?.style.removeProperty('bottom');
     }
@@ -78,12 +81,17 @@ export function applyStandaloneViewport(): void {
   if (keyboardOpen && appRoot) {
     const px = `${Math.round(visual)}px`;
     root.style.setProperty('--navo-app-h', px);
+    appRoot.style.position = 'fixed';
+    appRoot.style.left = '0';
+    appRoot.style.right = '0';
     appRoot.style.top = `${Math.round(offsetTop)}px`;
     appRoot.style.bottom = 'auto';
     appRoot.style.height = px;
     appRoot.style.maxHeight = px;
   } else {
     clearLocks();
+    // iOS scrolls the layout viewport when the keyboard dismisses; snap back.
+    if (window.scrollY !== 0) window.scrollTo(0, 0);
   }
 
   measureTabBarClearance();

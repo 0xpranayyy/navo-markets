@@ -35,19 +35,29 @@ html {
   background: #F2F2F7;
 }
 
-/* Full-bleed viewport for Safari, PWA, and desktop — no 430px phone cage */
+/*
+ * Full-bleed viewport — keep the root in NORMAL FLOW.
+ * iOS 26 clips a position:fixed root to an under-reported viewport height
+ * (bottom letterbox), and height:100% silently disables viewport-fit=cover.
+ */
 html,
 body,
 #root {
-  position: fixed;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   margin: 0;
   padding: 0;
   overflow: hidden;
   overscroll-behavior: none;
   background: inherit;
+}
+
+/* Installed PWA: 100vh is the only unit correct from cold start (100dvh
+   under-reports by the home-indicator inset in standalone mode). */
+html.navo-standalone,
+html.navo-standalone body,
+html.navo-standalone #root {
+  height: 100vh;
 }
 
 body {
@@ -83,8 +93,8 @@ html.navo-standalone body {
 }
 
 html.navo-standalone.navo-keyboard-open #root {
-  height: var(--navo-app-h, 100%);
-  max-height: var(--navo-app-h, 100%);
+  height: var(--navo-app-h, 100vh);
+  max-height: var(--navo-app-h, 100vh);
 }
 
 .navo-root-fill {
